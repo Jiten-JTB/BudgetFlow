@@ -16,12 +16,11 @@ A modern Android budget tracking app built with Jetpack Compose, featuring recur
 
 Three kinds of money are tracked, computed entirely client-side:
 
-| Pool | Behavior |
-|---|---|
-| **Lump Sum** | One-time income (bonus, gift, bet winnings). Active for the day it's created, then expires. |
-| **Timely Template** | Recurring income (salary, pocket money). Never counted directly — it spawns **slots**. |
-| **Timely Slot** | One per period (minute/day/week/month/year), auto-generated from a template. Counted in the budget while its period is active. |
-| **Savings** | A running total. When a Lump Sum or Slot expires with money left unspent, the leftover moves here automatically. |
+| Pool           | Behavior                                                                                                                                                                                                                                        |
+|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Lump Sum**   | One-time income (bonus, gift, bet winnings). Active for the day it's created, then expires.                                                                                                                                                     |
+| **Timely**     | Recurring income (salary, pocket money). A template defines the recurrence (frequency). it auto-generates one slot per period (minute/day/week/month/year), and that slot is what actually counts toward the budget while its period is active. |
+| **Savings**    | A running total. When a Lump Sum or Slot expires with money left unspent, the leftover moves here automatically.                                                                                                                                |
 
 Deleting a recurring source removes the template (stopping future slots) and its **currently active** slot — but past, already-expired slots stay untouched, preserving historical accuracy (e.g. you can stop a salary mid-year without erasing the months you were actually paid).
 
@@ -35,21 +34,21 @@ If the app is closed across multiple period boundaries (e.g. closed at 8:27, reo
 BudgetFlow/
 └── app/                          Android app (Kotlin + Jetpack Compose)
     └── src/main/java/com/example/budgetflow/
-        ├── MainActivity.kt           App entry point, navigation, top-level state
-        ├── Models.kt                 Data models + budget recurrence engine
-        ├── DataStore.kt              Persistence (transactions, budget, settings)
-        ├── SecureStorage.kt          Encrypted storage for the Gemini API key
-        ├── HomeScreen.kt             Transaction feed
-        ├── BudgetScreen.kt           Budget chart + source cards
-        ├── BudgetForm.kt             Add budget source dialog
-        ├── TransactionForm.kt        Add transaction dialog
-        ├── TransactionDetailScreen.kt
-        ├── AssistantScreen.kt        Chat UI + voice input
-        ├── AssistantViewModel.kt     Chat state, calls backend, executes actions
-        ├── AssistantRepository.kt    HTTP client for the backend
-        ├── SettingsScreen.kt         API key + server URL configuration
-        ├── AnalyticsScreen.kt        (placeholder)
-        └── PopUpForm.kt              Routes the [+] FAB to the right form
+        ├── MainActivity.kt             App entry point, navigation, top-level state
+        ├── Models.kt                   Data models + budget recurrence engine
+        ├── DataStore.kt                Persistence (transactions, budget, settings)
+        ├── SecureStorage.kt            Encrypted storage for the Gemini API key
+        ├── HomeScreen.kt               Transaction feed
+        ├── BudgetScreen.kt             Budget chart + source cards
+        ├── BudgetForm.kt               Add budget source dialog
+        ├── TransactionForm.kt          Add transaction dialog
+        ├── TransactionDetailScreen.kt  Full-screen view of a single transaction's details
+        ├── AssistantScreen.kt          Chat UI + voice input
+        ├── AssistantViewModel.kt       Chat state, calls backend, executes actions
+        ├── AssistantRepository.kt      HTTP client for the backend
+        ├── SettingsScreen.kt           API key + server URL configuration
+        ├── AnalyticsScreen.kt          (placeholder)
+        └── PopUpForm.kt                Routes the [+] FAB to the right form
 ```
 
 > **Note:** The AI agent backend (Node.js + LangChain) that powers the Assistant tab lives in a **separate repository**: [BudgetFlowServer](https://github.com/Jiten-JTB/BudgetFlowServer.git). It must be set up and running for the Assistant tab to work — see that repo's README for setup instructions.
