@@ -1,0 +1,2 @@
+org.springframework.boot.EnvironmentPostProcessor=\
+com.budgetflow.common.messaging.config.MessagingEnvironmentPostProcessor

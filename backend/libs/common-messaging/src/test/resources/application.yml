@@ -1,0 +1,12 @@
+spring:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:budgetflow/messaging/schema-fragment.sql
+budgetflow:
+  messaging:
+    outbox:
+      # Tests drive the relay explicitly.
+      relay-enabled: false
+      batch-size: 50
+      max-attempts: 3
