@@ -10,8 +10,9 @@ Rule for every phase: **write unit + integration tests first, then implement** u
 - [x] CI pipeline (GitHub Actions)
 
 ## Phase 1 — Identity & Gateway
-- [ ] `identity-service`: `db/schema.sql`, `db/reset.sql`, register/login/refresh, JWT
-- [ ] `api-gateway`: routing, JWT validation, rate limiting, CORS
+- [x] `identity-service`: `db/schema.sql`, `db/reset.sql`, register/login/refresh, JWT
+- [x] `api-gateway`: routing, JWT validation, rate limiting, CORS
+- [ ] Follow-ups: email verification, MFA (TOTP), branded login page (Phase 4), Spring Session (Redis) before running >1 identity instance
 
 ## Phase 2 — Core Domain
 - [ ] `account-service`: accounts, balance ledger, schema/reset SQL

@@ -1,0 +1,19 @@
+# Local development: `--spring.profiles.active=local`. Plain HTTP, throwaway key and dev client secret.
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false
+
+budgetflow:
+  identity:
+    signing-key:
+      allow-ephemeral: true
+    clients:
+      - client-id: budgetflow-web
+        client-name: Budget Flow Web
+        type: confidential
+        client-secret: local-dev-web-secret
+        redirect-uris: http://localhost:3000/api/auth/callback
+        post-logout-redirect-uris: http://localhost:3000/
+        scopes: openid,profile,budgetflow.api

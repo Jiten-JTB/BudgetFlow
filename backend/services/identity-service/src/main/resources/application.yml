@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: identity-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${IDENTITY_DB_URL:jdbc:postgresql://localhost:5432/identity_db}
+    username: ${IDENTITY_DB_USER:identity_svc}
+    password: ${IDENTITY_DB_PASSWORD:service_dev_password}
+    hikari:
+      maximum-pool-size: ${IDENTITY_DB_POOL_SIZE:10}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:budgetflow}
+    password: ${RABBITMQ_PASSWORD:rabbit_dev_password}
+
+server:
+  port: ${IDENTITY_PORT:9000}
+  forward-headers-strategy: framework     # trust X-Forwarded-* from Traefik for issuer URLs and client IPs
+  shutdown: graceful
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        name: BF_AUTH_SESSION
+        http-only: true
+        secure: ${IDENTITY_SECURE_COOKIES:true}
+        same-site: lax
+
+management:
+  server:
+    port: ${IDENTITY_MANAGEMENT_PORT:9001}  # internal only; never routed by Traefik
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+budgetflow:
+  identity:
+    issuer: ${IDENTITY_ISSUER:http://localhost:9000}
+    signing-key:
+      key-id: ${IDENTITY_SIGNING_KEY_ID:budgetflow-1}
+      private-key: ${IDENTITY_SIGNING_KEY_PEM:}
+      allow-ephemeral: false
+    lockout:
+      max-failed-attempts: 5
+      lock-duration: 15m
+    clients:
+      - client-id: budgetflow-web
+        client-name: Budget Flow Web
+        type: confidential
+        client-secret: ${IDENTITY_WEB_CLIENT_SECRET:}
+        redirect-uris: ${IDENTITY_WEB_REDIRECT_URIS:http://localhost:3000/api/auth/callback}
+        post-logout-redirect-uris: ${IDENTITY_WEB_POST_LOGOUT_URIS:http://localhost:3000/}
+        scopes: openid,profile,budgetflow.api

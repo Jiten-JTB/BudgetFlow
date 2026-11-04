@@ -20,6 +20,8 @@ Durable rules and decisions. Read before any work.
 - Web: **Next.js** (BFF, httpOnly cookies); Mobile later: Expo.
 - UI skills in `.claude/skills/`: frontend-design, ui-ux-pro-max, taste-skill (design-taste-frontend), impeccable (incl. `animate`).
 - Deploy: Dokploy on Hostinger VPS.
+- **Dokploy panel `dokploy.conceptkart.cloud` is shared, not fully owned: ask the user before ANY action on it; nothing critical or experimental.**
+- Domains: `budgetflow.` (web), `budgetflow-api.` (gateway), `budgetflow-auth.` (auth) on `jitenjtb.com`.
 
 ## Docs
 - `architecture.md` — system design

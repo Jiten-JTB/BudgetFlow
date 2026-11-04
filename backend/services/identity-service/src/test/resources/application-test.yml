@@ -1,0 +1,14 @@
+budgetflow:
+  identity:
+    issuer: https://budgetflow-auth.test
+    signing-key:
+      key-id: test-key
+      allow-ephemeral: true
+    clients:
+      - client-id: budgetflow-web
+        client-name: Budget Flow Web
+        type: confidential
+        client-secret: test-web-secret
+        redirect-uris: http://localhost:3000/api/auth/callback
+        post-logout-redirect-uris: http://localhost:3000/
+        scopes: openid,profile,budgetflow.api

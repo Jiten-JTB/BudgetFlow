@@ -124,27 +124,29 @@ Coverage gate: 80% line on domain/application.
 
 ## 9. Deployment (Hostinger VPS + Dokploy)
 
+- Traefik routing:
+  - `budgetflow-api.` → api-gateway `:8080`.
+  - `budgetflow-auth.` → identity-service `:9000`, **path allow-list only**: `/oauth2/`, `/.well-known/`, `/connect/`, `/userinfo`, `/login`, `/logout`, `/error`. `/api/**` must go through the gateway (rate limits).
+  - Management ports (`:8081`, `:9001`: health, Prometheus) are never routed.
+  - Traefik must overwrite client `X-Forwarded-For` (default when `forwardedHeaders.insecure` is off); the gateway's per-IP rate limit relies on it.
 - Each service = Docker image (layered jar, `eclipse-temurin:25-jre` / CDS-enabled; GraalVM native optional for low-traffic services).
 - JVM tuned for containers: `-XX:MaxRAMPercentage=75`, virtual threads on.
-- Dokploy manages: Postgres, RabbitMQ, Redis, services, Traefik domains (`app.`, `api.`).
+- Dokploy manages: Postgres, RabbitMQ, Redis, services, Traefik domains (see §10).
 - Domains: see §10.
 - Daily Postgres backups (Dokploy backup → S3-compatible storage).
 - Health: Spring Actuator liveness/readiness used by Dokploy.
 
-## 10. Domains Needed
+## 10. Domains
 
-1 root domain (e.g. `budgetflow.<tld>`) + DNS A records to the VPS:
-
-| Subdomain | Purpose | Public |
+| Domain | Purpose | Public |
 |---|---|---|
-| `app.` | Next.js web app | Yes |
-| `api.` | API gateway (web + mobile clients) | Yes |
-| `auth.` | identity-service OAuth2/OIDC issuer (login pages, tokens) | Yes |
-| `dokploy.` | Dokploy admin panel | Admin only (IP allow-list / basic auth) |
-| `grafana.` | Monitoring dashboards | Admin only |
-| root / `www.` | Redirect to `app.` (landing page later) | Yes |
+| `budgetflow.jitenjtb.com` | Next.js web app | Yes |
+| `budgetflow-api.jitenjtb.com` | API gateway (web + mobile clients) | Yes |
+| `budgetflow-auth.jitenjtb.com` | identity-service OAuth2/OIDC issuer (login pages, tokens) | Yes |
+| `dokploy.conceptkart.cloud` | Dokploy panel (**shared, not fully owned: ask first, nothing critical or experimental**) | Admin only |
+| `budgetflow-grafana.jitenjtb.com` | Monitoring dashboards (proposed, not confirmed) | Admin only |
 
-TLS via Traefik + Let's Encrypt. RabbitMQ/Postgres/Redis admin stay internal (SSH tunnel).
+DNS: A records to the VPS. TLS via Traefik + Let's Encrypt. RabbitMQ/Postgres/Redis admin stay internal (SSH tunnel).
 
 ## 11. Database Bootstrapping
 

@@ -48,6 +48,47 @@ services:
       timeout: 3s
       retries: 20
 
+  # --- Application services (opt-in): docker compose --profile apps up -d --build -------------------
+  identity-service:
+    profiles: [apps]
+    build:
+      context: ../backend
+      dockerfile: services/identity-service/Dockerfile
+    image: budgetflow/identity-service:dev
+    environment:
+      SPRING_PROFILES_ACTIVE: local                     # ephemeral signing key + dev client secret
+      IDENTITY_ISSUER: http://localhost:${IDENTITY_PORT:-9000}
+      IDENTITY_DB_URL: jdbc:postgresql://postgres:5432/identity_db
+      IDENTITY_DB_USER: identity_svc
+      IDENTITY_DB_PASSWORD: ${SERVICE_DB_PASSWORD:-service_dev_password}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-budgetflow}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-rabbit_dev_password}
+    ports:
+      - "${IDENTITY_PORT:-9000}:9000"
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+
+  api-gateway:
+    profiles: [apps]
+    build:
+      context: ../backend
+      dockerfile: services/api-gateway/Dockerfile
+    image: budgetflow/api-gateway:dev
+    environment:
+      IDENTITY_URI: http://identity-service:9000
+      IDENTITY_JWKS_URI: http://identity-service:9000/oauth2/jwks
+      IDENTITY_ISSUER: http://localhost:${IDENTITY_PORT:-9000}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_dev_password}
+      GATEWAY_CORS_ALLOWED_ORIGINS: http://localhost:3000
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      redis: { condition: service_healthy }
+      identity-service: { condition: service_healthy }
+
 volumes:
   postgres-data:
   rabbitmq-data:

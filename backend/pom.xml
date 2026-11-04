@@ -21,12 +21,17 @@
         <module>libs/common-core</module>
         <module>libs/common-messaging</module>
         <module>libs/common-security</module>
+        <module>libs/common-web</module>
+        <module>services/identity-service</module>
+        <module>services/api-gateway</module>
     </modules>
 
     <properties>
         <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-cloud.version>2025.1.4</spring-cloud.version>
         <testcontainers.version>2.0.5</testcontainers.version>
+        <bouncycastle.version>1.86</bouncycastle.version>
         <archunit.version>1.4.1</archunit.version>
         <jacoco.version>0.8.14</jacoco.version>
         <jacoco.minimum.line.coverage>0.80</jacoco.minimum.line.coverage>
@@ -48,6 +53,23 @@
                 <groupId>com.budgetflow</groupId>
                 <artifactId>common-security</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.budgetflow</groupId>
+                <artifactId>common-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -190,4 +212,42 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+          Services with a database keep db/schema.sql as the single source of truth.
+          Pre-production it is packaged as Flyway's baseline migration V1 so it is never edited twice.
+        -->
+        <profile>
+            <id>flyway-baseline-from-schema</id>
+            <activation>
+                <file>
+                    <exists>${project.basedir}/db/schema.sql</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-schema-as-flyway-baseline</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <copy file="${project.basedir}/db/schema.sql"
+                                              tofile="${project.build.outputDirectory}/db/migration/V1__baseline.sql"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
