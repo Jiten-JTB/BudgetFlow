@@ -9,6 +9,8 @@ public final class Exchanges {
     public static final String REPLIES = "budgetflow.replies";
     /** Domain events (fan-out to reporting, notifications, ...). */
     public static final String EVENTS = "budgetflow.events";
+    /** Direct exchange routing failed messages to {@code <queue>.dlq}. */
+    public static final String DEAD_LETTER = "budgetflow.dlx";
 
     private Exchanges() {}
 }

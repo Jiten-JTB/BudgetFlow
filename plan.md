@@ -15,12 +15,14 @@ Rule for every phase: **write unit + integration tests first, then implement** u
 - [ ] Follow-ups: email verification, MFA (TOTP), branded login page (Phase 4), Spring Session (Redis) before running >1 identity instance
 
 ## Phase 2 — Core Domain
-- [ ] `account-service`: accounts, balance ledger, schema/reset SQL
-- [ ] `transaction-service`: income/expense, categories, income sources, schema/reset SQL
-- [ ] `budget-service`: budgets, consumption, schema/reset SQL
+- [x] `account-service`: accounts, balance ledger, schema/reset SQL
+- [x] `transaction-service`: income/expense, categories, income sources, schema/reset SQL
+- [x] `budget-service`: budgets, consumption, schema/reset SQL
+- [x] Gateway routes, Dockerfiles, compose, end-to-end smoke test
 
 ## Phase 3 — Saga Orchestration
 - [ ] `orchestrator-service`: saga engine, state persistence, timeouts, schema/reset SQL
+- [ ] Saga command/reply handlers in account, budget and transaction services (use cases already built)
 - [ ] Sagas: RecordTransaction, TransferBetweenAccounts, Update/DeleteTransaction
 - [ ] Saga tests: happy path + every compensation path
 

@@ -27,11 +27,17 @@ import org.testcontainers.containers.GenericContainer;
 class GatewayIT {
 
     private static final StubUpstream UPSTREAM;
+    private static final StubUpstream ACCOUNTS;
+    private static final StubUpstream TRANSACTIONS;
+    private static final StubUpstream BUDGETS;
     private static final String ALLOWED_ORIGIN = "https://budgetflow.test";
 
     static {
         try {
             UPSTREAM = new StubUpstream();
+            ACCOUNTS = new StubUpstream();
+            TRANSACTIONS = new StubUpstream();
+            BUDGETS = new StubUpstream();
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -40,6 +46,9 @@ class GatewayIT {
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         registry.add("budgetflow.gateway.identity-uri", UPSTREAM::baseUrl);
+        registry.add("budgetflow.gateway.account-uri", ACCOUNTS::baseUrl);
+        registry.add("budgetflow.gateway.transaction-uri", TRANSACTIONS::baseUrl);
+        registry.add("budgetflow.gateway.budget-uri", BUDGETS::baseUrl);
         registry.add("budgetflow.gateway.jwt.issuer", () -> StubUpstream.ISSUER);
         registry.add("budgetflow.gateway.jwt.jwk-set-uri", () -> UPSTREAM.baseUrl() + "/oauth2/jwks");
         registry.add("budgetflow.gateway.cors.allowed-origins", () -> ALLOWED_ORIGIN);
@@ -152,6 +161,30 @@ class GatewayIT {
                 .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET.name())
                 .exchange()
                 .expectStatus().isForbidden();
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+        "/api/v1/accounts, ACCOUNTS",
+        "/api/v1/accounts/0198a3f2-7c1e-7d3a-9b2e-5f6a7b8c9d0e/entries, ACCOUNTS",
+        "/api/v1/transactions, TRANSACTIONS",
+        "/api/v1/categories, TRANSACTIONS",
+        "/api/v1/income-sources, TRANSACTIONS",
+        "/api/v1/budgets/status, BUDGETS"
+    })
+    void routesEachApiToItsOwningService(String path, String service) throws Exception {
+        StubUpstream target = switch (service) {
+            case "ACCOUNTS" -> ACCOUNTS;
+            case "TRANSACTIONS" -> TRANSACTIONS;
+            default -> BUDGETS;
+        };
+        int before = target.proxiedRequests.get();
+
+        client.get().uri(path).header(HttpHeaders.AUTHORIZATION, "Bearer " + UPSTREAM.validToken("u")).exchange()
+                .expectStatus().isOk()
+                .expectBody().jsonPath("$.path").isEqualTo(path);
+
+        assertThat(target.proxiedRequests.get()).isEqualTo(before + 1);
     }
 
     @Test

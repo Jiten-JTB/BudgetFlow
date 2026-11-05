@@ -35,6 +35,36 @@ spring:
                     key-resolver: "#{@principalKeyResolver}"
                     redis-rate-limiter.replenishRate: ${budgetflow.gateway.rate-limit.default.replenish-rate:10}
                     redis-rate-limiter.burstCapacity: ${budgetflow.gateway.rate-limit.default.burst-capacity:20}
+            - id: accounts
+              uri: ${budgetflow.gateway.account-uri}
+              predicates:
+                - Path=/api/v1/accounts,/api/v1/accounts/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    key-resolver: "#{@principalKeyResolver}"
+                    redis-rate-limiter.replenishRate: ${budgetflow.gateway.rate-limit.default.replenish-rate:10}
+                    redis-rate-limiter.burstCapacity: ${budgetflow.gateway.rate-limit.default.burst-capacity:20}
+            - id: transactions
+              uri: ${budgetflow.gateway.transaction-uri}
+              predicates:
+                - Path=/api/v1/transactions,/api/v1/transactions/**,/api/v1/categories,/api/v1/categories/**,/api/v1/income-sources,/api/v1/income-sources/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    key-resolver: "#{@principalKeyResolver}"
+                    redis-rate-limiter.replenishRate: ${budgetflow.gateway.rate-limit.default.replenish-rate:10}
+                    redis-rate-limiter.burstCapacity: ${budgetflow.gateway.rate-limit.default.burst-capacity:20}
+            - id: budgets
+              uri: ${budgetflow.gateway.budget-uri}
+              predicates:
+                - Path=/api/v1/budgets,/api/v1/budgets/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    key-resolver: "#{@principalKeyResolver}"
+                    redis-rate-limiter.replenishRate: ${budgetflow.gateway.rate-limit.default.replenish-rate:10}
+                    redis-rate-limiter.burstCapacity: ${budgetflow.gateway.rate-limit.default.burst-capacity:20}
 
 server:
   port: ${GATEWAY_PORT:8080}
@@ -56,6 +86,9 @@ management:
 budgetflow:
   gateway:
     identity-uri: ${IDENTITY_URI:http://localhost:9000}
+    account-uri: ${ACCOUNT_URI:http://localhost:8110}
+    transaction-uri: ${TRANSACTION_URI:http://localhost:8120}
+    budget-uri: ${BUDGET_URI:http://localhost:8130}
     jwt:
       issuer: ${IDENTITY_ISSUER:http://localhost:9000}
       jwk-set-uri: ${IDENTITY_JWKS_URI:http://localhost:9000/oauth2/jwks}

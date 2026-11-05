@@ -70,6 +70,63 @@ services:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
 
+  account-service:
+    profiles: [apps]
+    build:
+      context: ../backend
+      dockerfile: services/account-service/Dockerfile
+    image: budgetflow/account-service:dev
+    environment:
+      ACCOUNT_DB_URL: jdbc:postgresql://postgres:5432/account_db
+      ACCOUNT_DB_USER: account_svc
+      ACCOUNT_DB_PASSWORD: ${SERVICE_DB_PASSWORD:-service_dev_password}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-budgetflow}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-rabbit_dev_password}
+      IDENTITY_JWKS_URI: http://identity-service:9000/oauth2/jwks
+      IDENTITY_ISSUER: http://localhost:${IDENTITY_PORT:-9000}
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+
+  transaction-service:
+    profiles: [apps]
+    build:
+      context: ../backend
+      dockerfile: services/transaction-service/Dockerfile
+    image: budgetflow/transaction-service:dev
+    environment:
+      TRANSACTION_DB_URL: jdbc:postgresql://postgres:5432/transaction_db
+      TRANSACTION_DB_USER: transaction_svc
+      TRANSACTION_DB_PASSWORD: ${SERVICE_DB_PASSWORD:-service_dev_password}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-budgetflow}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-rabbit_dev_password}
+      IDENTITY_JWKS_URI: http://identity-service:9000/oauth2/jwks
+      IDENTITY_ISSUER: http://localhost:${IDENTITY_PORT:-9000}
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+
+  budget-service:
+    profiles: [apps]
+    build:
+      context: ../backend
+      dockerfile: services/budget-service/Dockerfile
+    image: budgetflow/budget-service:dev
+    environment:
+      BUDGET_DB_URL: jdbc:postgresql://postgres:5432/budget_db
+      BUDGET_DB_USER: budget_svc
+      BUDGET_DB_PASSWORD: ${SERVICE_DB_PASSWORD:-service_dev_password}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-budgetflow}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-rabbit_dev_password}
+      IDENTITY_JWKS_URI: http://identity-service:9000/oauth2/jwks
+      IDENTITY_ISSUER: http://localhost:${IDENTITY_PORT:-9000}
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+
   api-gateway:
     profiles: [apps]
     build:
@@ -78,6 +135,9 @@ services:
     image: budgetflow/api-gateway:dev
     environment:
       IDENTITY_URI: http://identity-service:9000
+      ACCOUNT_URI: http://account-service:8110
+      TRANSACTION_URI: http://transaction-service:8120
+      BUDGET_URI: http://budget-service:8130
       IDENTITY_JWKS_URI: http://identity-service:9000/oauth2/jwks
       IDENTITY_ISSUER: http://localhost:${IDENTITY_PORT:-9000}
       REDIS_HOST: redis
@@ -88,6 +148,9 @@ services:
     depends_on:
       redis: { condition: service_healthy }
       identity-service: { condition: service_healthy }
+      account-service: { condition: service_healthy }
+      transaction-service: { condition: service_healthy }
+      budget-service: { condition: service_healthy }
 
 volumes:
   postgres-data:

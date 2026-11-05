@@ -11,7 +11,13 @@ import org.springframework.validation.annotation.Validated;
 /** Route URIs and rate limits are referenced from application.yml placeholders. */
 @ConfigurationProperties("budgetflow.gateway")
 @Validated
-public record GatewayProperties(@NotBlank String identityUri, @NotNull @Valid Jwt jwt, @NotNull @Valid Cors cors) {
+public record GatewayProperties(
+        @NotBlank String identityUri,
+        @NotBlank String accountUri,
+        @NotBlank String transactionUri,
+        @NotBlank String budgetUri,
+        @NotNull @Valid Jwt jwt,
+        @NotNull @Valid Cors cors) {
 
     /**
      * @param issuer    public issuer that must appear in {@code iss} (budgetflow-auth)

@@ -26,27 +26,36 @@ Targets: **Web first**, then Android & iOS.
 
 | Service | Responsibility | DB |
 |---|---|---|
-| `api-gateway` | Routing, JWT validation, CORS, rate limit, request ID | — |
-| `identity-service` | Users, registration, login, refresh tokens, MFA, profile/preferences (currency, timezone) | `identity_db` |
-| `account-service` | Money accounts/wallets (bank, cash, card), balances, balance ledger | `account_db` |
-| `transaction-service` | Income & expense entries, categories, income sources, recurring rules, attachments metadata | `transaction_db` |
-| `budget-service` | Budgets per category/period, limits, consumption tracking | `budget_db` |
-| `orchestrator-service` | Saga definitions, saga state, step/compensation dispatch, timeouts | `orchestrator_db` |
-| `notification-service` | Email/push/in-app alerts (budget exceeded, saga failure) | `notification_db` |
-| `reporting-service` | Read models (CQRS) built from events: monthly summaries, trends, dashboards | `reporting_db` |
+| `api-gateway` (8080) | Routing, JWT validation, CORS, rate limit, request ID | — |
+| `identity-service` (9000) | Users, registration, login, refresh tokens, MFA, profile/preferences (currency, timezone) | `identity_db` |
+| `account-service` (8110) | Money accounts/wallets (bank, cash, card), balances, balance ledger | `account_db` |
+| `transaction-service` (8120) | Income & expense entries, categories, income sources, recurring rules, attachments metadata | `transaction_db` |
+| `budget-service` (8130) | Budgets per category/period, limits, consumption tracking | `budget_db` |
+| `orchestrator-service` (8140) | Saga definitions, saga state, step/compensation dispatch, timeouts | `orchestrator_db` |
+| `notification-service` (8150) | Email/push/in-app alerts (budget exceeded, saga failure) | `notification_db` |
+| `reporting-service` (8160) | Read models (CQRS) built from events: monthly summaries, trends, dashboards | `reporting_db` |
 
 Inter-service sync calls are avoided for writes; writes that span services go through a saga.
+Management (health, Prometheus) runs on port + 1, internal only.
+
+Events consumed so far: `identity.UserRegistered` → account-service opens a "Cash" account in the base currency; transaction-service seeds 6 income and 12 expense categories.
+Each consumer has its own durable quorum queue `<service>.<event>` plus `<queue>.dlq`. Consumers retry 1 + 4 times with exponential backoff, then dead-letter.
 
 ## 3. Sagas (Orchestration)
 
-All sagas: orchestrator persists state → sends command → awaits reply → next step or compensate. Each step is idempotent (keyed by `saga_id + step`). Timeouts trigger compensation.
+All sagas: orchestrator persists state → sends command → awaits reply → next step or compensate. Each step is idempotent (keyed by an operation key such as `txn:<id>:apply`). Timeouts trigger compensation.
 
-**RecordTransaction (income or expense)**
-1. `transaction-service`: create transaction `PENDING`  ↺ mark `CANCELLED`
-2. `account-service`: apply balance delta (credit/debit)  ↺ reverse delta
-3. `budget-service`: consume budget (expense only; may emit `BudgetThresholdReached`)  ↺ release consumption
-4. `transaction-service`: mark `COMPLETED`
-→ events published → `reporting-service`, `notification-service`
+**RecordTransaction (income or expense)**: started by transaction-service, run by the orchestrator.
+0. `transaction-service` stores the transaction `PENDING` (API returns `202`) and emits `transaction.TransactionRequested` (outbox).
+1. `account-service` applies the signed amount, key `txn:<id>:apply`  ↺ reverse
+2. `budget-service` consumes matching budgets (expenses only), key `txn:<id>:budget`  ↺ release
+3. `transaction-service` marks `COMPLETED`  ↺ (on failure) marks `CANCELLED` with the failure code
+→ `TransactionCompleted` / `TransactionCancelled`, `BalanceChanged`, `BudgetThresholdReached` / `BudgetExceeded` events → reporting, notifications.
+
+Participant rules (built in Phase 2):
+- Every step is idempotent by operation key, and calls on the same key are serialised (Postgres advisory locks).
+- Compensation is safe in any order: compensating a step that never ran leaves a tombstone, so a late original is refused (`OPERATION_CANCELLED`).
+- Budgets are soft limits: they never fail a saga, they raise alert events.
 
 **TransferBetweenAccounts**: create transfer `PENDING` → debit source ↺ credit back → credit target ↺ debit back → complete.
 

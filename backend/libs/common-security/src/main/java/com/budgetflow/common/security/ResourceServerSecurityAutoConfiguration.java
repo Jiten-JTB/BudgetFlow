@@ -15,7 +15,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Zero-trust defaults for every servlet service: stateless JWT bearer auth on all endpoints
+ * Zero-trust defaults for every servlet service: stateless JWT bearer auth (with the {@code budgetflow.api} scope) on all endpoints
  * except health/info probes and API docs. The gateway validates too; services never trust it blindly.
  */
 @AutoConfiguration(beforeName = {
@@ -24,6 +24,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableWebSecurity
 public class ResourceServerSecurityAutoConfiguration {
+
+    /** Access tokens must carry the API scope; ID tokens or tokens for other audiences are refused. */
+    public static final String API_SCOPE = "SCOPE_budgetflow.api";
 
     static final String[] PUBLIC_PATHS = {
             "/actuator/health", "/actuator/health/**", "/actuator/info", "/v3/api-docs/**", "/error"};
@@ -36,7 +39,7 @@ public class ResourceServerSecurityAutoConfiguration {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS).permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().hasAuthority(API_SCOPE))
                 .oauth2ResourceServer(o -> o.jwt(Customizer.withDefaults()))
                 .build();
     }
