@@ -69,13 +69,13 @@ public class TransactionService {
                 command.counterAccountId(), amount, command.categoryId(), command.incomeSourceId(), occurredOn,
                 command.description(), command.payee(), idempotencyKey, requestHash,
                 LocalDate.ofInstant(now, ZoneOffset.UTC), now);
-        validateReferences(userId, transaction);
+        UUID parentCategoryId = validateReferences(userId, transaction);
 
         if (!transactions.insert(transaction)) {
             // Lost a race with a concurrent request carrying the same key.
             return replay(transactions.findByIdempotencyKey(userId, idempotencyKey).orElseThrow(), requestHash);
         }
-        events.requested(transaction);
+        events.requested(transaction, parentCategoryId);
         return new RecordResult(transaction, false);
     }
 
@@ -117,7 +117,9 @@ public class TransactionService {
         return transaction;
     }
 
-    private void validateReferences(UUID userId, Transaction transaction) {
+    /** @return the parent of the transaction's category, or null */
+    private UUID validateReferences(UUID userId, Transaction transaction) {
+        UUID parentCategoryId = null;
         if (transaction.categoryId() != null) {
             Category category = categories.findOwned(userId, transaction.categoryId())
                     .orElseThrow(() -> new DomainException(TransactionErrors.CATEGORY_NOT_FOUND, "Category not found"));
@@ -129,6 +131,7 @@ public class TransactionService {
                 throw new DomainException(TransactionErrors.CATEGORY_KIND_MISMATCH,
                         transaction.kind() + " needs an " + expected + " category");
             }
+            parentCategoryId = category.parentId();
         }
         if (transaction.incomeSourceId() != null) {
             IncomeSource source = incomeSources.findOwned(userId, transaction.incomeSourceId())
@@ -137,6 +140,7 @@ public class TransactionService {
                 throw new DomainException(TransactionErrors.INCOME_SOURCE_ARCHIVED, "Income source is archived");
             }
         }
+        return parentCategoryId;
     }
 
     private static RecordResult replay(Transaction existing, String requestHash) {

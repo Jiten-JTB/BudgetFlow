@@ -1,5 +1,6 @@
 package com.budgetflow.account.config;
 
+import com.budgetflow.account.adapter.in.messaging.SagaCommandListener;
 import com.budgetflow.account.adapter.in.messaging.UserRegisteredListener;
 import com.budgetflow.account.adapter.out.messaging.OutboxAccountEventPublisher;
 import com.budgetflow.account.adapter.out.persistence.JdbcAccountRepository;
@@ -14,6 +15,7 @@ import com.budgetflow.common.messaging.config.Exchanges;
 import com.budgetflow.common.messaging.consumer.QueueTopology;
 import com.budgetflow.common.messaging.inbox.IdempotentConsumer;
 import com.budgetflow.common.messaging.outbox.OutboxWriter;
+import com.budgetflow.common.messaging.saga.SagaParticipantFactory;
 import java.time.Clock;
 import org.springframework.amqp.core.Declarables;
 import org.springframework.context.annotation.Bean;
@@ -54,6 +56,16 @@ class ApplicationConfig {
     BalanceService balanceService(AccountRepository accounts, BalanceEntryRepository entries, JdbcClient jdbc,
                                   AccountEventPublisher events, Clock clock) {
         return new BalanceService(accounts, entries, new JdbcOperationRegistry(jdbc), events, clock);
+    }
+
+    @Bean
+    Declarables sagaCommandTopology() {
+        return QueueTopology.subscribe(SagaCommandListener.QUEUE, Exchanges.COMMANDS, SagaCommandListener.ROUTING_PATTERN);
+    }
+
+    @Bean
+    SagaCommandListener sagaCommandListener(SagaParticipantFactory participants, BalanceService balances) {
+        return new SagaCommandListener(participants, balances);
     }
 
     @Bean

@@ -63,7 +63,7 @@ class TransactionServiceTest {
         assertThat(result.transaction().status()).isEqualTo(TransactionStatus.PENDING);
         assertThat(result.transaction().id().version()).isEqualTo(7);
         verify(transactions).insert(result.transaction());
-        verify(events).requested(result.transaction());
+        verify(events).requested(result.transaction(), null);
     }
 
     @Test
@@ -80,7 +80,17 @@ class TransactionServiceTest {
         food.archive(NOW);
         assertError(() -> service.record(USER, expense(food.id(), "1"), "key-00000004"), TransactionErrors.CATEGORY_ARCHIVED);
         assertError(() -> service.record(USER, expense(UUID.randomUUID(), "1"), "key-00000005"), TransactionErrors.CATEGORY_NOT_FOUND);
-        verify(events, never()).requested(any());
+        verify(events, never()).requested(any(), any());
+    }
+
+    @Test
+    void sagaRequestCarriesParentOfSubCategory() {
+        Category dining = Category.create(UUID.randomUUID(), USER, "Dining", CategoryKind.EXPENSE, food.id(), null, null, NOW);
+        when(categories.findOwned(USER, dining.id())).thenReturn(Optional.of(dining));
+
+        RecordResult result = service.record(USER, expense(dining.id(), "99"), "key-00000011");
+
+        verify(events).requested(result.transaction(), food.id());
     }
 
     @Test

@@ -127,6 +127,23 @@ services:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
 
+  orchestrator-service:
+    profiles: [apps]
+    build:
+      context: ../backend
+      dockerfile: services/orchestrator-service/Dockerfile
+    image: budgetflow/orchestrator-service:dev
+    environment:
+      ORCHESTRATOR_DB_URL: jdbc:postgresql://postgres:5432/orchestrator_db
+      ORCHESTRATOR_DB_USER: orchestrator_svc
+      ORCHESTRATOR_DB_PASSWORD: ${SERVICE_DB_PASSWORD:-service_dev_password}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-budgetflow}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-rabbit_dev_password}
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+
   api-gateway:
     profiles: [apps]
     build:

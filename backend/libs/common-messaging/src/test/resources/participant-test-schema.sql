@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS participant_effect (id UUID PRIMARY KEY, note VARCHAR(50));

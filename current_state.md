@@ -1,8 +1,8 @@
 # Budget Flow — Current State
 
-_Last updated: 2026-11-04 (Phase 2)_
+_Last updated: 2026-11-06 (Phase 3)_
 
-**Phase:** 2 — Core Domain ✅ complete. Next: Phase 3 (orchestrator-service + sagas).
+**Phase:** 3 — Saga Orchestration ✅ complete (create flows). Next: Phase 4 (Next.js web app).
 
 ## Done
 - Docs: `architecture.md`, `plan.md`, `memory.md`, `CLAUDE.md`
@@ -32,13 +32,24 @@ _Last updated: 2026-11-04 (Phase 2)_
 - Phase 2 end-to-end smoke test passed on real containers: default Cash account + 18 categories created via events; account, income source, expense (202 → replay 200), budget status and idempotent adjustment all through the gateway; all outboxes drained, DLQs empty, no errors in any service log
 - Full backend build: 223 tests green
 
+- Phase 3:
+  - `common-messaging/saga`: `SagaContract`, `SagaReply`, `SagaParticipant` (exactly-once command + reply; business failure gives a FAILURE reply), `CommandFields`.
+  - `common-test`: `SagaCommands` helper.
+  - Participants: account (apply/reverse), budget (consume/release), transaction (complete/cancel). `TransactionRequested` now carries `parentCategoryId`.
+  - `services/orchestrator-service` (8140, internal only): `saga_instance` + `saga_event`; RecordTransaction and TransferBetweenAccounts; reverse-order compensation then cancel; step timeouts (compensate, or resend for the final step); stale-reply protection; duplicate-trigger protection — 17 unit + 6 integration tests.
+  - Full-stack run on real containers: expense, income and transfer all COMPLETED with correct balances and budget usage.
+  - Bad transfer (INR to USD account): debit reversed, transaction CANCELLED `ACCOUNT_CURRENCY_MISMATCH`.
+  - Expense on archived account: CANCELLED `ACCOUNT_ARCHIVED`.
+  - Budget threshold and exceeded alerts each fired once. All outboxes drained, all queues empty, 0 ERROR log lines.
+- Full backend build: 262 tests green
+
 ## Commands
 - Build + all tests: `cd backend && ./mvnw verify`
 - Local infra: `docker compose -f infra/docker-compose.yml up -d`
 - Local infra + services: `docker compose -f infra/docker-compose.yml --profile apps up -d --build` (identity `:9000`, gateway `:8080`)
 
 ## Next
-- Phase 3: `orchestrator-service` (saga state, timeouts) + command/reply handlers in account, budget and transaction services
+- Phase 4: Next.js web app (pnpm workspace, BFF auth, design system via UI skills); Update/Delete transaction sagas with the edit UI
 
 ## Open Decisions
 - Grafana: **on hold** (user's call). Domain `budgetflow-grafana.jitenjtb.com` exists.
@@ -46,7 +57,9 @@ _Last updated: 2026-11-04 (Phase 2)_
 
 ## Notes
 - Production secrets needed (Dokploy env, when deploying): `IDENTITY_SIGNING_KEY_PEM` (RSA 2048+ PKCS#8), `IDENTITY_WEB_CLIENT_SECRET`, DB/RabbitMQ/Redis passwords. Issuer = `https://budgetflow-auth.jitenjtb.com`.
-- Transactions stay `PENDING` until Phase 3: balances and budgets are not yet updated by recorded transactions.
+- Cross-currency transfers are not supported (the credit step refuses; saga compensates).
+- No admin view yet for `FAILED` sagas (alert on the `SAGA FAILED` log line).
+- **Fixed 2026-11-06:** `.gitignore` rule `out/` matched every `adapter/out/` source package, so those 21 files were missing from the Phase 1-2 commits. Now anchored to `/out/` and `/build/`.
 - budget-service accepts any category id (it cannot check transaction-service's categories); the saga supplies real ids.
 - Not done yet: email verification (blocked on email provider), MFA, branded login page, OpenAPI docs, Spring Session for multi-instance identity.
 - Login page is Spring's default form for now.

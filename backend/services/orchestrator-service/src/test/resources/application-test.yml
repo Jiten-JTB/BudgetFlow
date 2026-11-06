@@ -1,0 +1,6 @@
+budgetflow:
+  messaging:
+    outbox:
+      poll-interval: 50ms
+  orchestrator:
+    timeout-scan-interval: 200ms

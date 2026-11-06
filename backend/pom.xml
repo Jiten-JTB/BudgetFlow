@@ -27,6 +27,7 @@
         <module>services/account-service</module>
         <module>services/transaction-service</module>
         <module>services/budget-service</module>
+        <module>services/orchestrator-service</module>
         <module>services/api-gateway</module>
     </modules>
 

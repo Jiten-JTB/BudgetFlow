@@ -4,6 +4,8 @@ import com.budgetflow.common.messaging.config.Exchanges;
 import com.budgetflow.common.messaging.consumer.QueueTopology;
 import com.budgetflow.common.messaging.inbox.IdempotentConsumer;
 import com.budgetflow.common.messaging.outbox.OutboxWriter;
+import com.budgetflow.common.messaging.saga.SagaParticipantFactory;
+import com.budgetflow.transaction.adapter.in.messaging.SagaCommandListener;
 import com.budgetflow.transaction.adapter.in.messaging.UserRegisteredListener;
 import com.budgetflow.transaction.adapter.out.messaging.OutboxTransactionEventPublisher;
 import com.budgetflow.transaction.adapter.out.persistence.JdbcCategoryRepository;
@@ -54,6 +56,16 @@ class ApplicationConfig {
                                           IncomeSourceRepository sources, OutboxWriter outbox, Clock clock) {
         return new TransactionService(new JdbcTransactionRepository(jdbc), categories, sources,
                 new OutboxTransactionEventPublisher(outbox), clock);
+    }
+
+    @Bean
+    Declarables sagaCommandTopology() {
+        return QueueTopology.subscribe(SagaCommandListener.QUEUE, Exchanges.COMMANDS, SagaCommandListener.ROUTING_PATTERN);
+    }
+
+    @Bean
+    SagaCommandListener sagaCommandListener(SagaParticipantFactory participants, TransactionService transactions) {
+        return new SagaCommandListener(participants, transactions);
     }
 
     @Bean

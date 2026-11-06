@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: orchestrator-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${ORCHESTRATOR_DB_URL:jdbc:postgresql://localhost:5432/orchestrator_db}
+    username: ${ORCHESTRATOR_DB_USER:orchestrator_svc}
+    password: ${ORCHESTRATOR_DB_PASSWORD:service_dev_password}
+    hikari:
+      maximum-pool-size: ${ORCHESTRATOR_DB_POOL_SIZE:10}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:budgetflow}
+    password: ${RABBITMQ_PASSWORD:rabbit_dev_password}
+
+server:
+  port: ${ORCHESTRATOR_PORT:8140}   # no public API; internal only
+  shutdown: graceful
+
+management:
+  server:
+    port: ${ORCHESTRATOR_MANAGEMENT_PORT:8141}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+budgetflow:
+  orchestrator:
+    step-timeout: ${ORCHESTRATOR_STEP_TIMEOUT:30s}
+    max-attempts: 5
+    timeout-scan-interval: 1s

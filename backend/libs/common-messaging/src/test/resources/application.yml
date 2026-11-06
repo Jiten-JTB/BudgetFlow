@@ -2,7 +2,7 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:budgetflow/messaging/schema-fragment.sql
+      schema-locations: classpath:budgetflow/messaging/schema-fragment.sql,classpath:participant-test-schema.sql
 budgetflow:
   messaging:
     outbox:

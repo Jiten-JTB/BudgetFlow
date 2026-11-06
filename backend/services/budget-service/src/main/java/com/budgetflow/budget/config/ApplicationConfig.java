@@ -1,5 +1,6 @@
 package com.budgetflow.budget.config;
 
+import com.budgetflow.budget.adapter.in.messaging.SagaCommandListener;
 import com.budgetflow.budget.adapter.out.messaging.OutboxBudgetEventPublisher;
 import com.budgetflow.budget.adapter.out.persistence.JdbcBudgetRepository;
 import com.budgetflow.budget.adapter.out.persistence.JdbcConsumptionRepository;
@@ -9,7 +10,11 @@ import com.budgetflow.budget.application.BudgetService;
 import com.budgetflow.budget.application.ConsumptionService;
 import com.budgetflow.budget.application.port.BudgetRepository;
 import com.budgetflow.budget.application.port.UsageRepository;
+import com.budgetflow.common.messaging.config.Exchanges;
+import com.budgetflow.common.messaging.consumer.QueueTopology;
 import com.budgetflow.common.messaging.outbox.OutboxWriter;
+import com.budgetflow.common.messaging.saga.SagaParticipantFactory;
+import org.springframework.amqp.core.Declarables;
 import java.time.Clock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +41,16 @@ class ApplicationConfig {
     @Bean
     BudgetService budgetService(BudgetRepository budgets, UsageRepository usages, Clock clock) {
         return new BudgetService(budgets, usages, clock);
+    }
+
+    @Bean
+    Declarables sagaCommandTopology() {
+        return QueueTopology.subscribe(SagaCommandListener.QUEUE, Exchanges.COMMANDS, SagaCommandListener.ROUTING_PATTERN);
+    }
+
+    @Bean
+    SagaCommandListener sagaCommandListener(SagaParticipantFactory participants, ConsumptionService consumption) {
+        return new SagaCommandListener(participants, consumption);
     }
 
     @Bean

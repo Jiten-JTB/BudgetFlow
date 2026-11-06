@@ -57,6 +57,17 @@ Participant rules (built in Phase 2):
 - Compensation is safe in any order: compensating a step that never ran leaves a tombstone, so a late original is refused (`OPERATION_CANCELLED`).
 - Budgets are soft limits: they never fail a saga, they raise alert events.
 
+**Saga wire contract (built in Phase 3)**
+- Commands go to the `budgetflow.commands` exchange. Type is `<service>.<CommandName>`, routing key is `<service>.<command-name>`, and the body carries `sagaId`, `commandId` and fields.
+  - account: `ApplyBalanceChange`, `ReverseBalanceChange`
+  - budget: `ConsumeBudget`, `ReleaseBudget`
+  - transaction: `CompleteTransaction`, `CancelTransaction`
+- Replies go to `budgetflow.replies` with routing key `orchestrator.saga-reply`, body `{sagaId, commandId, commandType, outcome SUCCESS|FAILURE, errorCode, errorMessage}`.
+- Participants (`SagaParticipant`): the business work, inbox record and reply commit together. A `DomainException` rolls the work back and sends a FAILURE reply with the error code. Other errors are retried, then dead-lettered, and the step timeout takes over.
+- Orchestrator: one persisted state machine per saga (`saga_instance`), with a full audit trail (`saga_event`).
+  - Step timeout: 30s. A forward step that times out is compensated, including the timed-out step itself (safe because of tombstones). `COMPLETE_TRANSACTION` is resent instead, up to 5 attempts.
+  - A failed compensation sets the saga to `FAILED` and logs `SAGA FAILED - manual intervention required` (alert on it).
+
 **TransferBetweenAccounts**: create transfer `PENDING` → debit source ↺ credit back → credit target ↺ debit back → complete.
 
 **UpdateTransaction / DeleteTransaction**: same steps applying the delta between old and new values.

@@ -3,6 +3,7 @@ package com.budgetflow.common.messaging.config;
 import com.budgetflow.common.messaging.inbox.IdempotentConsumer;
 import com.budgetflow.common.messaging.outbox.OutboxRelay;
 import com.budgetflow.common.messaging.outbox.OutboxWriter;
+import com.budgetflow.common.messaging.saga.SagaParticipantFactory;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +55,12 @@ public class MessagingAutoConfiguration {
     @ConditionalOnMissingBean
     IdempotentConsumer idempotentConsumer(JdbcClient jdbc, TransactionTemplate tx) {
         return new IdempotentConsumer(jdbc, tx);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    SagaParticipantFactory sagaParticipantFactory(IdempotentConsumer inbox, OutboxWriter outbox, JsonMapper json) {
+        return new SagaParticipantFactory(inbox, outbox, json);
     }
 
     @Bean

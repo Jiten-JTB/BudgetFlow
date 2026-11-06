@@ -21,10 +21,12 @@ Rule for every phase: **write unit + integration tests first, then implement** u
 - [x] Gateway routes, Dockerfiles, compose, end-to-end smoke test
 
 ## Phase 3 — Saga Orchestration
-- [ ] `orchestrator-service`: saga engine, state persistence, timeouts, schema/reset SQL
-- [ ] Saga command/reply handlers in account, budget and transaction services (use cases already built)
-- [ ] Sagas: RecordTransaction, TransferBetweenAccounts, Update/DeleteTransaction
-- [ ] Saga tests: happy path + every compensation path
+- [x] `orchestrator-service`: saga engine, state persistence, timeouts, schema/reset SQL
+- [x] Saga command/reply handlers in account, budget and transaction services
+- [x] Sagas: RecordTransaction (income/expense), TransferBetweenAccounts
+- [x] Saga tests: happy path + every compensation path, timeouts, stale replies; full-stack run with real compensations
+- [ ] Sagas: UpdateTransaction / DeleteTransaction (move to Phase 4 with the edit/delete UI)
+- [ ] Ops: admin view or endpoint for FAILED sagas + retry
 
 ## Phase 4 — Web App
 - [x] UI skills installed in `.claude/skills/`
