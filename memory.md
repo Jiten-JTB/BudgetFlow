@@ -23,6 +23,11 @@ Durable rules and decisions. Read before any work.
 - **Dokploy panel `dokploy.conceptkart.cloud` is shared, not fully owned: ask the user before ANY action on it; nothing critical or experimental.**
 - Domains: `budgetflow.` (web), `budgetflow-api.` (gateway), `budgetflow-auth.` (auth) on `jitenjtb.com`.
 
+## UI Work
+- Read `PRODUCT.md` (root) and `frontend/apps/web/DESIGN.md` before any UI change; impeccable artifacts live in `frontend/apps/web/.impeccable/`.
+- Money in the UI is always a decimal string through `@budgetflow/money`; never floats.
+- Never import constants from a `"use client"` module into Server Components; keep reference lists (currencies, time zones) static.
+
 ## Docs
 - `architecture.md` — system design
 - `plan.md` — phased roadmap

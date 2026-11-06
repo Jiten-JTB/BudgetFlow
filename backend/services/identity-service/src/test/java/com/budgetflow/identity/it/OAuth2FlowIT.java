@@ -152,7 +152,7 @@ class OAuth2FlowIT extends IdentityIntegrationTest {
                 .andExpect(jsonPath("$.code_challenge_methods_supported[0]").value("S256"));
         mvc.perform(get("/oauth2/jwks"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.keys[0].kid").value("test-key"))
+                .andExpect(jsonPath("$.keys[0].kid", org.hamcrest.Matchers.startsWith("test-key-ephemeral-")))
                 .andExpect(jsonPath("$.keys[0].d").doesNotExist());
     }
 

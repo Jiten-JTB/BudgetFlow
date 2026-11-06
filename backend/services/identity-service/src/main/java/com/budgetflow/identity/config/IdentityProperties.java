@@ -14,9 +14,11 @@ public record IdentityProperties(
         @NotBlank String issuer,
         @NotNull @Valid SigningKey signingKey,
         Lockout lockout,
-        List<@Valid Client> clients) {
+        List<@Valid Client> clients,
+        String webSignupUrl) {
 
     public IdentityProperties {
+        webSignupUrl = webSignupUrl == null || webSignupUrl.isBlank() ? "http://localhost:3000/signup" : webSignupUrl;
         lockout = lockout == null ? new Lockout(null, null) : lockout;
         clients = clients == null ? List.of() : clients;
     }

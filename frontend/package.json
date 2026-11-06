@@ -1,0 +1,16 @@
+{
+  "name": "budgetflow-frontend",
+  "private": true,
+  "packageManager": "pnpm@10.34.9",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "build": "pnpm -r --if-present build"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "5.1.0",
+    "@types/node": "24.19.2"
+  }
+}

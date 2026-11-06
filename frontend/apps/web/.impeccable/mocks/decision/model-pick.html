@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Budget Flow · Bahi-Khata Ledger</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cloth:#9E2A20;--turmeric:#E0A526;--indigo:#26305C;--page:#F4F3EF;--ink:#3B3A36;--rule:#DCD9D2;--mute:#77746C}
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;font-family:"Hind",sans-serif;background:var(--page);color:var(--ink);display:grid;grid-template-columns:220px 1fr;font-variant-numeric:tabular-nums}
+nav{background:var(--cloth);color:#F6E6D8;padding:28px 18px;display:flex;flex-direction:column;gap:2px;border-right:6px solid var(--turmeric)}
+.mark{font-weight:700;font-size:20px;margin-bottom:26px}
+nav a{color:#F0D2C4;font-size:16px;padding:9px 12px;border-radius:4px}
+nav a.on{background:#7F2018;color:#fff}
+.add{margin-top:auto;background:var(--turmeric);color:var(--indigo);font-weight:700;border:0;border-radius:4px;padding:14px;font-size:16px;font-family:inherit}
+main{padding:34px 44px;display:grid;grid-template-columns:repeat(12,1fr);gap:24px;grid-auto-rows:min-content}
+.top{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--indigo);padding-bottom:16px}
+.top h1{font-size:28px;color:var(--indigo);font-weight:600}.top span{color:var(--mute)}
+.fig{grid-column:span 4;padding:6px 0}
+.fig small{color:var(--mute);font-size:15px}.fig b{display:block;font-size:38px;color:var(--indigo);font-weight:600}
+.fig.out b{color:var(--cloth)}
+.panel{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:22px 26px}
+.acc{grid-column:1/6}.txn{grid-column:6/13}
+h2{font-size:18px;color:var(--indigo);margin-bottom:12px}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--rule);font-size:15px}
+.row b{color:var(--indigo)} .neg{color:var(--cloth)!important}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;color:var(--mute);font-weight:500;padding-bottom:8px;border-bottom:1px solid var(--indigo)}
+td{padding:10px 0;border-bottom:1px solid var(--rule)}td.n{text-align:right;font-weight:600}
+</style></head><body>
+<nav><div class="mark">Budget Flow</div><a class="on">Overview</a><a>Transactions</a><a>Accounts</a><a>Budgets</a><a>Income sources</a><a>Categories</a><a>Settings</a>
+<button class="add">Add transaction</button></nav>
+<main>
+<div class="top"><h1>November 2026</h1><span>Books opened 1 April 2026</span></div>
+<div class="fig"><small>Money in</small><b>₹1,24,500</b></div>
+<div class="fig out"><small>Money out</small><b>₹86,320</b></div>
+<div class="fig"><small>Total balance</small><b>₹6,42,915</b></div>
+<section class="panel acc"><h2>Accounts</h2>
+<div class="row"><span>HDFC Savings</span><b>₹5,18,400</b></div><div class="row"><span>ICICI Credit Card</span><b class="neg">−₹24,385</b></div>
+<div class="row"><span>Cash</span><b>₹8,900</b></div><div class="row"><span>Zerodha</span><b>₹1,40,000</b></div></section>
+<section class="panel txn"><h2>Recent entries</h2>
+<table><tr><th>Date</th><th>Particulars</th><th>Account</th><th style="text-align:right">Amount</th></tr>
+<tr><td>6 Nov</td><td>Swiggy dinner</td><td>ICICI Credit Card</td><td class="n neg">−₹640</td></tr>
+<tr><td>5 Nov</td><td>Acme Corp salary</td><td>HDFC Savings</td><td class="n">+₹1,10,000</td></tr>
+<tr><td>4 Nov</td><td>BigBasket groceries</td><td>HDFC Savings</td><td class="n neg">−₹2,315</td></tr>
+<tr><td>3 Nov</td><td>Freelance: Lumen Studio</td><td>HDFC Savings</td><td class="n">+₹14,500</td></tr></table></section>
+</main></body></html>

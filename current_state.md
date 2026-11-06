@@ -1,8 +1,8 @@
 # Budget Flow — Current State
 
-_Last updated: 2026-11-06 (Phase 3)_
+_Last updated: 2026-11-06 (Phase 4)_
 
-**Phase:** 3 — Saga Orchestration ✅ complete (create flows). Next: Phase 4 (Next.js web app).
+**Phase:** 4 — Web app ✅ complete. Next: Phase 5 (reporting-service, notification-service) or production deployment (Phase 6), user's call.
 
 ## Done
 - Docs: `architecture.md`, `plan.md`, `memory.md`, `CLAUDE.md`
@@ -43,10 +43,29 @@ _Last updated: 2026-11-06 (Phase 3)_
   - Budget threshold and exceeded alerts each fired once. All outboxes drained, all queues empty, 0 ERROR log lines.
 - Full backend build: 262 tests green
 
+## Phase 4 progress (resume here)
+- [x] `PRODUCT.md` written (impeccable init interview): solo individuals, desktop-first, WCAG 2.2 AA, locale-aware amounts (Indian grouping), English only, never gamified.
+- [x] Visual direction chosen by user: **Bahi-Khata Ledger**. Contract in `.impeccable/surfaces/frontend-apps-web.md` (signature: facing pages, money in left / money out right, balance at the spine). Sketches: `.impeccable/mocks/decision/`.
+- [x] 4a Frontend monorepo (`frontend/`, pnpm) + `@budgetflow/money` + `@budgetflow/api-client` (zod) with tests
+- [x] 4b Auth BFF in Next.js (PKCE login, callback, refresh, logout; encrypted httpOnly session; BFF proxy with Origin check) — 20 unit tests; live sign-in to be verified in 4c
+- [x] 4c Design tokens (`globals.css`, AA-checked: indigo focus ring on light 11.4:1, turmeric only on the rail), vermilion rail + mobile top bar (native disclosure menu), overview with facing pages (`build-overview.ts` view-model), live sign-in verified in a real browser (httpOnly session, no console errors). Screens: `frontend/apps/web/.impeccable/review/`
+- [x] 4d All screens: add transaction (live confirmation, safe retry), transactions list with filters/paging, accounts (list/open/ledger/adjust/rename/archive), budgets (status/create/limit/archive), income sources, categories (2 levels), settings, public sign-up (server action, forwards visitor IP for rate limits). 78 web unit tests; browser journey (new user sign-up → every page) passes with 0 console errors.
+- [x] 4e Branded identity-service sign-in page (Thymeleaf; self-hosted Mukta + OFL licence; one generic error for wrong password and locked account; links to web sign-up via `IDENTITY_WEB_SIGNUP_URL`) — `LoginPageIT` 4 tests; identity suite 49 green
+- [x] 4f Playwright E2E `frontend/apps/web/e2e/` — 8 tests incl. axe WCAG 2.2 AA on 10 screens, passing twice in a row; run with stack started using `SIGNUP_RATE_TOKENS=1`, then `corepack pnpm e2e`. web Dockerfile (standalone, non-root, 302 MB) + compose `web` service — E2E 8/8 against the production container. frontend CI workflow (`.github/workflows/frontend.yml`, not yet run on GitHub); impeccable detector run (1 accepted exception) and finish review (inline, fallback procedure) → fix → verdict `ship`; transaction-service gained `incomeSourceId` and parent-inclusive `categoryId` filters so every overview line opens its transactions. `DESIGN.md` + `.impeccable/design.json` written from the built code (North Star \"The Merchant's Ledger\", controls precise and quiet).
+- Fixed during 4f: identity throwaway (local) signing keys now get a unique key id per restart (verifiers cached the old key under the reused id → 401s); server pages turn an API 401 into sign-in + return; sign-out now lands on `/signed-out` (identity `IDENTITY_WEB_POST_LOGOUT_URIS` updated).
+- impeccable artifacts live in `frontend/apps/web/.impeccable/` (brief: `surfaces/frontend-apps-web-src-app.md`, read with `impeccable surface-brief read frontend/apps/web/src/app`); `frontend/apps/web/PRODUCT.md` is a symlink to the root `PRODUCT.md`. Face: Mukta (Hind lacks tabular figures).
+- Dev loop: backend `docker compose -f infra/docker-compose.yml -p bf-web --profile apps up -d` with ports POSTGRES 56432, RABBITMQ 55672/55673, REDIS 56379, IDENTITY 59000, GATEWAY 58080, `WEB_PORT=3300` (port 3000 is taken on this machine); web `cd frontend/apps/web && corepack pnpm exec next dev --port 3300` with `.env.local` (see `.env.local.example`). Restart `next dev` if Tailwind classes in a newly created file are missing.
+- Follow-up: saga confirmation takes ~3.4 s locally because each of ~6 message hops waits for the 500 ms outbox poll; wake the relay right after commit (afterCommit hook) to make logging feel instant.
+- Lessons: never import constants from a `"use client"` module into Server Components (they become client references); keep currency/time-zone lists static (`src/lib/reference-data/`) because Node and browser ICU lists differ and break hydration.
+- Notes: impeccable telemetry disabled via `IMPECCABLE_NO_TELEMETRY=1`; never `pkill -f serve-question` (kills own shell).
+
+- Totals at end of Phase 4: backend 267 tests; frontend 102 unit tests (money 11, api-client 9, web 82); 8 Playwright E2E tests incl. axe WCAG 2.2 AA on 10 screens.
+
 ## Commands
 - Build + all tests: `cd backend && ./mvnw verify`
 - Local infra: `docker compose -f infra/docker-compose.yml up -d`
-- Local infra + services: `docker compose -f infra/docker-compose.yml --profile apps up -d --build` (identity `:9000`, gateway `:8080`)
+- Local infra + services + web: `docker compose -f infra/docker-compose.yml --profile apps up -d --build` (web `:3000`, identity `:9000`, gateway `:8080`)
+- Frontend: `cd frontend && corepack pnpm test` / `typecheck` / `build`; E2E: start the stack with `SIGNUP_RATE_TOKENS=1`, then `cd frontend/apps/web && corepack pnpm e2e`
 
 ## Next
 - Phase 4: Next.js web app (pnpm workspace, BFF auth, design system via UI skills); Update/Delete transaction sagas with the edit UI

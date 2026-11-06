@@ -70,9 +70,10 @@ class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Actuator is served on the internal management port only (see application.yml).
                         .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
-                        .requestMatchers("/login", "/error").permitAll()
+                        .requestMatchers("/login", "/error", "/css/**", "/fonts/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
+                        .loginPage("/login")
                         .successHandler(new LoginOutcomeHandlers.Success(loginAttempts))
                         .failureHandler(new LoginOutcomeHandlers.Failure(loginAttempts)))
                 .build();

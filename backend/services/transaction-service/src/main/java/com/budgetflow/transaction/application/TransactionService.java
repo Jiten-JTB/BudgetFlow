@@ -166,10 +166,10 @@ public class TransactionService {
 
     /** Parses list filters with precise error codes. */
     public static TransactionQuery query(String from, String to, String kind, String status, UUID accountId,
-                                         UUID categoryId) {
+                                         UUID categoryId, UUID incomeSourceId) {
         return new TransactionQuery(Inputs.date(from), Inputs.date(to),
                 kind == null ? null : Inputs.enumValue(TransactionKind.class, kind, TransactionErrors.INVALID_KIND),
                 status == null ? null : Inputs.enumValue(TransactionStatus.class, status, TransactionErrors.INVALID_STATUS),
-                accountId, categoryId);
+                accountId, categoryId, incomeSourceId);
     }
 }

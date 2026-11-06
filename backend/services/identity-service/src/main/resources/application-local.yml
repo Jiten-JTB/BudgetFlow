@@ -14,6 +14,6 @@ budgetflow:
         client-name: Budget Flow Web
         type: confidential
         client-secret: local-dev-web-secret
-        redirect-uris: http://localhost:3000/api/auth/callback
-        post-logout-redirect-uris: http://localhost:3000/
+        redirect-uris: ${IDENTITY_WEB_REDIRECT_URIS:http://localhost:3000/api/auth/callback}
+        post-logout-redirect-uris: ${IDENTITY_WEB_POST_LOGOUT_URIS:http://localhost:3000/signed-out}
         scopes: openid,profile,budgetflow.api

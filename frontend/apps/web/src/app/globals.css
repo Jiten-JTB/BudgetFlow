@@ -1,0 +1,53 @@
+/* Scan only the source tree (the app root holds a symlink to the repo-level PRODUCT.md). */
+@import "tailwindcss" source("../");
+
+/* Budget Flow: the bahi-khata world. Vermilion bookcloth spine, turmeric thread, indigo ink on a quiet page. */
+@theme {
+  --font-sans: var(--font-mukta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-cloth: #9e2a20;        /* rail, money out */
+  --color-cloth-deep: #7f2018;   /* active rail item */
+  --color-cloth-ink: #f6e6d8;    /* text on cloth */
+  --color-cloth-mute: #ecc8b8;   /* secondary text on cloth (4.8:1) */
+  --color-thread: #e0a526;       /* primary action fill, warnings, focus on the rail (never text or focus on light: 2.2:1) */
+  --color-thread-ink: #7a5300;   /* warning text on light (6.2:1 page, 6.9:1 panel) */
+  --color-indigo: #26305c;       /* figures, headings, money in */
+  --color-page: #f4f3ef;
+  --color-panel: #ffffff;
+  --color-ink: #33322e;          /* body text (11.6:1 on page) */
+  --color-mute: #66635c;         /* secondary text (5.4:1 on page, 6.0:1 on panel) */
+  --color-rule: #e3e0d9;
+  --color-rule-strong: #cfcbc2;
+
+  /* One fixed money ramp: hierarchy is never improvised. */
+  --text-money-xl: 2.5rem;
+  --text-money-lg: 1.75rem;
+  --text-money-md: 1.25rem;
+  --text-money-sm: 0.9375rem;
+  --text-money-xs: 0.8125rem;
+
+  --radius-sheet: 10px;
+  --shadow-sheet: 0 1px 2px rgb(38 48 92 / 0.06), 0 8px 24px -12px rgb(38 48 92 / 0.18);
+}
+
+@layer base {
+  html { background: var(--color-page); color: var(--color-ink); }
+  body { font-family: var(--font-sans); font-size: 0.9375rem; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3 { color: var(--color-indigo); line-height: 1.2; text-wrap: balance; }
+  ::selection { background: rgb(224 165 38 / 0.35); color: var(--color-indigo); }
+  input, textarea { caret-color: var(--color-cloth); }
+  /* Indigo ring on light surfaces (11.4:1); the rail switches to turmeric (3.4:1 on cloth). */
+  :focus-visible { outline: 2px solid var(--color-indigo); outline-offset: 2px; border-radius: 4px; }
+  .on-cloth :focus-visible { outline-color: var(--color-thread); }
+  a { text-underline-offset: 3px; }
+  * { scrollbar-color: var(--color-rule-strong) transparent; scrollbar-width: thin; }
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

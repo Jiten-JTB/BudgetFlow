@@ -55,9 +55,10 @@ class TransactionController {
                         @RequestParam(required = false) String from, @RequestParam(required = false) String to,
                         @RequestParam(required = false) String kind, @RequestParam(required = false) String status,
                         @RequestParam(required = false) UUID accountId, @RequestParam(required = false) UUID categoryId,
+                        @RequestParam(required = false) UUID incomeSourceId,
                         @RequestParam(required = false) String cursor, @RequestParam(defaultValue = "50") int limit) {
         TransactionPage page = transactions.search(userId,
-                TransactionService.query(from, to, kind, status, accountId, categoryId), cursor, limit);
+                TransactionService.query(from, to, kind, status, accountId, categoryId, incomeSourceId), cursor, limit);
         return new PageResponse(page.items().stream().map(TransactionResponse::of).toList(), page.nextCursor());
     }
 

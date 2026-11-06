@@ -58,6 +58,9 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: local                     # ephemeral signing key + dev client secret
       IDENTITY_ISSUER: http://localhost:${IDENTITY_PORT:-9000}
+      IDENTITY_WEB_REDIRECT_URIS: http://localhost:${WEB_PORT:-3000}/api/auth/callback
+      IDENTITY_WEB_POST_LOGOUT_URIS: http://localhost:${WEB_PORT:-3000}/signed-out
+      IDENTITY_WEB_SIGNUP_URL: http://localhost:${WEB_PORT:-3000}/signup
       IDENTITY_DB_URL: jdbc:postgresql://postgres:5432/identity_db
       IDENTITY_DB_USER: identity_svc
       IDENTITY_DB_PASSWORD: ${SERVICE_DB_PASSWORD:-service_dev_password}
@@ -160,6 +163,9 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_dev_password}
       GATEWAY_CORS_ALLOWED_ORIGINS: http://localhost:3000
+      # Sign-up limit: tokens per sign-up out of a 60-token bucket refilling 1/s (12 = 5 per minute).
+      # E2E runs set SIGNUP_RATE_TOKENS=1 because every test signs up a fresh user from the same IP.
+      BUDGETFLOW_GATEWAY_RATE_LIMIT_REGISTRATION_REQUESTED_TOKENS: ${SIGNUP_RATE_TOKENS:-12}
     ports:
       - "${GATEWAY_PORT:-8080}:8080"
     depends_on:
@@ -168,6 +174,26 @@ services:
       account-service: { condition: service_healthy }
       transaction-service: { condition: service_healthy }
       budget-service: { condition: service_healthy }
+
+  web:
+    profiles: [apps]
+    build:
+      context: ../frontend
+      dockerfile: apps/web/Dockerfile
+    image: budgetflow/web:dev
+    environment:
+      AUTH_ISSUER: http://localhost:${IDENTITY_PORT:-9000}
+      AUTH_INTERNAL_URL: http://identity-service:9000      # token exchange stays on the internal network
+      AUTH_CLIENT_ID: budgetflow-web
+      AUTH_CLIENT_SECRET: local-dev-web-secret
+      APP_URL: http://localhost:${WEB_PORT:-3000}
+      API_URL: http://api-gateway:8080
+      SESSION_SECRET: ${WEB_SESSION_SECRET:-local-dev-session-secret-change-me-0123456789}
+      SECURE_COOKIES: "false"
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api-gateway: { condition: service_healthy }
 
 volumes:
   postgres-data:

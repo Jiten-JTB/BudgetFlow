@@ -30,10 +30,11 @@ Rule for every phase: **write unit + integration tests first, then implement** u
 
 ## Phase 4 — Web App
 - [x] UI skills installed in `.claude/skills/`
-- [ ] Next.js app scaffold (pnpm workspace) + design system via UI skills
-- [ ] Generated API client from OpenAPI
-- [ ] Screens: auth, dashboard, accounts, transactions, income sources, budgets, settings
-- [ ] Vitest + Playwright tests
+- [x] Next.js app (pnpm workspace) + design system via UI skills (impeccable: PRODUCT.md, direction "Bahi-Khata Ledger", DESIGN.md)
+- [x] Typed API client (`@budgetflow/api-client`, zod-validated against the backend contracts). OpenAPI generation deferred.
+- [x] Screens: sign-up, branded sign-in, overview, transactions, accounts, budgets, income sources, categories, settings
+- [x] Vitest + Playwright tests (incl. axe WCAG 2.2 AA), web Docker image, frontend CI
+- [ ] Follow-ups: edit/delete transaction sagas + UI; OpenAPI docs; ESLint; faster saga confirmation (wake the outbox relay after commit); dark theme
 
 ## Phase 5 — Supporting Services
 - [ ] `reporting-service` (read models, charts data)

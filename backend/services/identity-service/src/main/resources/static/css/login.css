@@ -1,0 +1,41 @@
+/* Budget Flow sign-in: the same bahi-khata world as the web app (tokens mirror frontend/apps/web/src/app/globals.css). */
+@font-face { font-family: Mukta; font-weight: 400; font-display: swap; src: url(/fonts/mukta-400.woff2) format("woff2"); }
+@font-face { font-family: Mukta; font-weight: 600; font-display: swap; src: url(/fonts/mukta-600.woff2) format("woff2"); }
+@font-face { font-family: Mukta; font-weight: 700; font-display: swap; src: url(/fonts/mukta-700.woff2) format("woff2"); }
+
+:root {
+  --cloth: #9e2a20; --cloth-ink: #f6e6d8; --thread: #e0a526; --indigo: #26305c;
+  --page: #f4f3ef; --panel: #ffffff; --ink: #33322e; --mute: #66635c; --rule-strong: #cfcbc2;
+  --shadow: 0 1px 2px rgb(38 48 92 / 0.06), 0 8px 24px -12px rgb(38 48 92 / 0.18);
+}
+* { box-sizing: border-box; margin: 0; }
+html { background: var(--page); color: var(--ink); }
+body { font: 400 0.9375rem/1.5 Mukta, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+::selection { background: rgb(224 165 38 / 0.35); color: var(--indigo); }
+:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; border-radius: 4px; }
+
+.layout { display: grid; min-height: 100dvh; }
+.spine { display: none; }
+.page { display: grid; place-items: center; padding: 2.5rem 1rem; }
+.sheet { width: 100%; max-width: 26rem; background: var(--panel); border-radius: 10px; box-shadow: var(--shadow); padding: 2rem; }
+.wordmark { font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em; }
+.wordmark--small { color: var(--cloth); font-size: 1.125rem; margin-bottom: 0.25rem; }
+h1 { color: var(--indigo); font-size: 1.5rem; font-weight: 600; line-height: 1.2; margin-bottom: 1.5rem; }
+form { display: flex; flex-direction: column; }
+label { font-weight: 500; font-size: 0.875rem; margin-bottom: 0.375rem; }
+input { font: inherit; color: var(--ink); caret-color: var(--cloth); border: 1px solid var(--rule-strong); border-radius: 6px;
+        padding: 0.625rem 0.75rem; margin-bottom: 1.25rem; background: var(--panel); }
+button { font: inherit; font-weight: 600; color: #fff; background: var(--indigo); border: 0; border-radius: 6px; padding: 0.75rem; cursor: pointer; }
+button:hover { background: #1d2549; }
+.alert { color: var(--cloth); background: rgb(158 42 32 / 0.08); border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; }
+.notice { color: var(--mute); margin-bottom: 1.25rem; }
+.aside { color: var(--mute); font-size: 0.875rem; margin-top: 1.5rem; }
+a { color: var(--indigo); text-underline-offset: 3px; }
+
+@media (min-width: 64rem) {
+  .layout { grid-template-columns: minmax(20rem, 28rem) 1fr; }
+  .spine { display: flex; flex-direction: column; justify-content: space-between; padding: 2.5rem;
+           background: var(--cloth); color: var(--cloth-ink); border-right: 4px solid var(--thread); }
+  .promise { font-size: 1.5rem; font-weight: 600; line-height: 1.35; max-width: 20rem; }
+  .wordmark--small { display: none; }
+}

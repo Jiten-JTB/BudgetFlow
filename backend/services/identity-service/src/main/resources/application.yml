@@ -48,6 +48,7 @@ budgetflow:
       key-id: ${IDENTITY_SIGNING_KEY_ID:budgetflow-1}
       private-key: ${IDENTITY_SIGNING_KEY_PEM:}
       allow-ephemeral: false
+    web-signup-url: ${IDENTITY_WEB_SIGNUP_URL:http://localhost:3000/signup}
     lockout:
       max-failed-attempts: 5
       lock-duration: 15m
@@ -57,5 +58,5 @@ budgetflow:
         type: confidential
         client-secret: ${IDENTITY_WEB_CLIENT_SECRET:}
         redirect-uris: ${IDENTITY_WEB_REDIRECT_URIS:http://localhost:3000/api/auth/callback}
-        post-logout-redirect-uris: ${IDENTITY_WEB_POST_LOGOUT_URIS:http://localhost:3000/}
+        post-logout-redirect-uris: ${IDENTITY_WEB_POST_LOGOUT_URIS:http://localhost:3000/signed-out}
         scopes: openid,profile,budgetflow.api

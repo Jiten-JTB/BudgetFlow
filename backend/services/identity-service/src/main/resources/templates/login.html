@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Sign in · Budget Flow</title>
+  <link rel="preload" href="/fonts/mukta-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" th:href="@{/css/login.css}" href="/css/login.css">
+</head>
+<body>
+<main class="layout">
+  <aside class="spine" aria-hidden="true">
+    <span class="wordmark">Budget Flow</span>
+    <p class="promise">See where your money comes from, where it goes, and what you kept.</p>
+    <span></span>
+  </aside>
+  <section class="page">
+    <div class="sheet">
+      <p class="wordmark wordmark--small">Budget Flow</p>
+      <h1>Sign in</h1>
+      <p class="notice" role="status" th:if="${signedOut}">You’re signed out.</p>
+      <p class="alert" role="alert" th:if="${failed}">That email and password don’t match. After 5 wrong tries, sign-in pauses for 15 minutes.</p>
+      <form method="post" th:action="@{/login}" action="/login" novalidate>
+        <label for="username">Email</label>
+        <input id="username" name="username" type="email" autocomplete="username" required autofocus>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">Sign in</button>
+      </form>
+      <p class="aside">New to Budget Flow? <a th:href="${signupUrl}" href="#">Create an account</a></p>
+    </div>
+  </section>
+</main>
+</body>
+</html>

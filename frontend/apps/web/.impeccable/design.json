@@ -1,0 +1,391 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-06T09:02:00+00:00",
+  "title": "Design System: Budget Flow",
+  "extensions": {
+    "colorMeta": {
+      "vermilion-cloth": {
+        "role": "primary",
+        "displayName": "Vermilion Bookcloth",
+        "canonical": "oklch(46.7% 0.154 29.2)",
+        "tonalRamp": [
+          "#1d0101",
+          "#4c0905",
+          "#80160f",
+          "#ad382d",
+          "#d65e50",
+          "#f48d7e",
+          "#ffbcb0",
+          "#ffe2da"
+        ]
+      },
+      "vermilion-deep": {
+        "role": "primary",
+        "displayName": "Ledger Spine Red",
+        "canonical": "oklch(39.8% 0.131 29.1)",
+        "tonalRamp": [
+          "#1b0302",
+          "#47110c",
+          "#79231b",
+          "#a44337",
+          "#cc6759",
+          "#eb9386",
+          "#febfb5",
+          "#ffe4dd"
+        ]
+      },
+      "cloth-ink": {
+        "role": "neutral",
+        "displayName": "Parchment Ink (on cloth)",
+        "canonical": "oklch(93.4% 0.026 63.7)",
+        "tonalRamp": [
+          "#0e0a07",
+          "#2c251e",
+          "#4e4338",
+          "#716357",
+          "#958679",
+          "#b8aba0",
+          "#d8cfc7",
+          "#f3ede8"
+        ]
+      },
+      "cloth-mute": {
+        "role": "neutral",
+        "displayName": "Faded Cloth Ink",
+        "canonical": "oklch(85.9% 0.047 45.3)",
+        "tonalRamp": [
+          "#110906",
+          "#33221a",
+          "#593e32",
+          "#7d5e50",
+          "#a28172",
+          "#c4a79a",
+          "#e1ccc3",
+          "#f9ebe6"
+        ]
+      },
+      "turmeric-thread": {
+        "role": "secondary",
+        "displayName": "Turmeric Thread",
+        "canonical": "oklch(75.8% 0.147 80.8)",
+        "tonalRamp": [
+          "#160700",
+          "#3d1e00",
+          "#693800",
+          "#905900",
+          "#b67d00",
+          "#d5a54a",
+          "#edcc92",
+          "#ffecc8"
+        ]
+      },
+      "turmeric-ink": {
+        "role": "secondary",
+        "displayName": "Turmeric Ink",
+        "canonical": "oklch(47.3% 0.099 77.4)",
+        "tonalRamp": [
+          "#130900",
+          "#372100",
+          "#603d00",
+          "#855e14",
+          "#aa813e",
+          "#cba872",
+          "#e6cda8",
+          "#fcecd5"
+        ]
+      },
+      "indigo-ink": {
+        "role": "tertiary",
+        "displayName": "Indigo Ledger Ink",
+        "canonical": "oklch(32.5% 0.079 271.7)",
+        "tonalRamp": [
+          "#070a17",
+          "#1e253f",
+          "#37426c",
+          "#566394",
+          "#7887ba",
+          "#9facd8",
+          "#c6d0ef",
+          "#e7eeff"
+        ]
+      },
+      "indigo-deep": {
+        "role": "tertiary",
+        "displayName": "Night Indigo",
+        "canonical": "oklch(27.8% 0.067 271.9)",
+        "tonalRamp": [
+          "#080a15",
+          "#1f253b",
+          "#394366",
+          "#58648d",
+          "#7b87b2",
+          "#a1acd2",
+          "#c8d0eb",
+          "#e9eeff"
+        ]
+      },
+      "page": {
+        "role": "neutral",
+        "displayName": "Ledger Page",
+        "canonical": "oklch(96.4% 0.005 95.1)",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#272625",
+          "#464542",
+          "#676663",
+          "#8a8985",
+          "#afaeab",
+          "#d1d1cf",
+          "#efeeed"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Clean Sheet",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d1d1d1",
+          "#eeeeee"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Lamp-black Ink",
+        "canonical": "oklch(31.7% 0.007 95.3)",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#272624",
+          "#464541",
+          "#676662",
+          "#8a8984",
+          "#afaeaa",
+          "#d2d1ce",
+          "#efeeec"
+        ]
+      },
+      "mute": {
+        "role": "neutral",
+        "displayName": "Pencil Grey",
+        "canonical": "oklch(50.0% 0.012 87.5)",
+        "tonalRamp": [
+          "#0c0b09",
+          "#282622",
+          "#47453f",
+          "#69665f",
+          "#8c8981",
+          "#b0aea7",
+          "#d3d1cc",
+          "#efeeeb"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Ruled Line",
+        "canonical": "oklch(90.7% 0.010 87.5)",
+        "tonalRamp": [
+          "#0c0b09",
+          "#282623",
+          "#474540",
+          "#686660",
+          "#8c8982",
+          "#b0aea8",
+          "#d2d1cd",
+          "#efeeec"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Pressed Rule",
+        "canonical": "oklch(84.3% 0.013 86.8)",
+        "tonalRamp": [
+          "#0c0b09",
+          "#282622",
+          "#48453e",
+          "#69665e",
+          "#8c8980",
+          "#b1aea6",
+          "#d3d1cc",
+          "#f0eeeb"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Page title",
+        "purpose": "One h1 per page: month or section name."
+      },
+      "money-xl": {
+        "displayName": "Struck balance",
+        "purpose": "The spine's kept/overspent figure and an account's balance."
+      },
+      "money-lg": {
+        "displayName": "Page total",
+        "purpose": "Money in / money out totals and the headline 'You have'."
+      },
+      "title": {
+        "displayName": "Sheet title",
+        "purpose": "h2 at the top of each sheet."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Everything else, including table rows."
+      },
+      "label": {
+        "displayName": "Field label",
+        "purpose": "Form labels and column heads."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sheet",
+        "value": "0 1px 2px rgb(38 48 92 / 0.06), 0 8px 24px -12px rgb(38 48 92 / 0.18)",
+        "purpose": "Every working sheet on the page ground."
+      },
+      {
+        "name": "add-button",
+        "value": "0 2px 6px -2px rgb(0 0 0 / 0.35)",
+        "purpose": "Lifts the turmeric action off the vermilion rail."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-change",
+        "value": "150ms ease (Tailwind transition-colors)",
+        "purpose": "Hover and selection colour changes only."
+      },
+      {
+        "name": "confirming-pulse",
+        "value": "animate-pulse on a 6px turmeric dot",
+        "purpose": "A transaction still being confirmed; removed under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Indigo ink button for the main action of a form.",
+      "html": "<button class=\"ds-btn-primary\">Save expense</button>",
+      "css": ".ds-btn-primary{background:var(--color-indigo,#26305c);color:#fff;font:600 0.9375rem/1.5 Mukta,system-ui,sans-serif;padding:10px 20px;border:0;border-radius:6px;cursor:pointer;transition:background .15s}.ds-btn-primary:hover{background:#1d2549}.ds-btn-primary:focus-visible{outline:2px solid #26305c;outline-offset:2px}"
+    },
+    {
+      "name": "Add Transaction",
+      "kind": "button",
+      "refersTo": "button-add",
+      "description": "The one turmeric action on every screen, at the foot of the rail.",
+      "html": "<a class=\"ds-btn-add\" href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\"><path d=\"M5 12h14M12 5v14\"/></svg>Add transaction</a>",
+      "css": ".ds-btn-add{display:inline-flex;align-items:center;gap:8px;background:#e0a526;color:#26305c;font:600 0.9375rem/1.5 Mukta,system-ui,sans-serif;padding:12px 16px;border-radius:6px;text-decoration:none;box-shadow:0 2px 6px -2px rgb(0 0 0/.35)}.ds-btn-add:hover{background:#ebb33c}.ds-btn-add:focus-visible{outline:2px solid #26305c;outline-offset:2px}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Secondary actions: cancel, keep, save name.",
+      "html": "<button class=\"ds-btn-quiet\">Keep it</button>",
+      "css": ".ds-btn-quiet{background:transparent;color:#26305c;font:500 0.9375rem/1.5 Mukta,system-ui,sans-serif;padding:10px 16px;border:0;border-radius:6px;cursor:pointer}.ds-btn-quiet:hover{background:#e3e0d9}.ds-btn-quiet:focus-visible{outline:2px solid #26305c;outline-offset:2px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Label above, hint beside, error below and linked.",
+      "html": "<label class=\"ds-field\"><span>Amount</span><input class=\"ds-input\" inputmode=\"decimal\" placeholder=\"0.00\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:6px;font:500 0.875rem/1.5 Mukta,system-ui,sans-serif;color:#33322e}.ds-input{font:400 0.9375rem/1.5 Mukta,system-ui,sans-serif;color:#33322e;background:#fff;border:1px solid #cfcbc2;border-radius:6px;padding:10px 12px;caret-color:#9e2a20;font-variant-numeric:tabular-nums}.ds-input:focus-visible{outline:2px solid #26305c;outline-offset:2px}.ds-input[aria-invalid=true]{border-color:#9e2a20}"
+    },
+    {
+      "name": "Rail Item",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Navigation on the vermilion spine; the current page sits darker.",
+      "html": "<nav class=\"ds-rail\"><a class=\"ds-rail-item ds-current\" aria-current=\"page\" href=\"#\">Overview</a><a class=\"ds-rail-item\" href=\"#\">Transactions</a></nav>",
+      "css": ".ds-rail{display:flex;flex-direction:column;gap:4px;background:#9e2a20;padding:16px;border-right:4px solid #e0a526;width:220px}.ds-rail-item{color:#ecc8b8;text-decoration:none;font:400 0.9375rem/1.5 Mukta,system-ui,sans-serif;padding:8px 12px;border-radius:6px}.ds-rail-item:hover{background:rgb(127 32 24/.6);color:#f6e6d8}.ds-current{background:#7f2018;color:#f6e6d8;font-weight:500}.ds-rail-item:focus-visible{outline:2px solid #e0a526;outline-offset:2px}"
+    },
+    {
+      "name": "Budget Line",
+      "kind": "custom",
+      "description": "Spent against limit; the state is also said in words.",
+      "html": "<div class=\"ds-budget\"><div class=\"ds-budget-head\"><b>Shopping</b><span>₹7,900.00 of ₹6,000.00</span></div><div class=\"ds-bar\" role=\"progressbar\" aria-valuenow=\"131\" aria-valuemin=\"0\" aria-valuemax=\"131\"><i></i></div><span class=\"ds-over\">₹1,900.00 over</span></div>",
+      "css": ".ds-budget{display:flex;flex-direction:column;gap:6px;font:400 0.9375rem/1.5 Mukta,system-ui,sans-serif;color:#33322e;width:420px}.ds-budget-head{display:flex;justify-content:space-between}.ds-budget-head span{color:#66635c;font-size:.875rem;font-variant-numeric:tabular-nums}.ds-bar{height:8px;background:#e3e0d9;border-radius:999px;overflow:hidden}.ds-bar i{display:block;height:100%;width:100%;background:#9e2a20}.ds-over{color:#9e2a20;font-weight:500;font-size:.875rem}"
+    },
+    {
+      "name": "Facing Pages",
+      "kind": "custom",
+      "description": "The signature spread: money in, the struck balance at the spine, money out.",
+      "html": "<div class=\"ds-spread\"><section><h3>Money in</h3><b class=\"ds-in\">₹1,24,500.00</b></section><div class=\"ds-spine\"><small>Kept this month</small><b>₹80,196.00</b></div><section><h3>Money out</h3><b class=\"ds-out\">₹44,304.00</b></section></div>",
+      "css": ".ds-spread{display:grid;grid-template-columns:1fr 12rem 1fr;background:#fff;border-radius:10px;box-shadow:0 1px 2px rgb(38 48 92/.06),0 8px 24px -12px rgb(38 48 92/.18);font:400 0.9375rem/1.5 Mukta,system-ui,sans-serif;width:720px}.ds-spread section{padding:24px;display:flex;justify-content:space-between;align-items:baseline}.ds-spread h3{color:#26305c;font-size:1.125rem;font-weight:600;margin:0}.ds-spread b{font-size:1.75rem;font-weight:600;font-variant-numeric:tabular-nums}.ds-in{color:#26305c}.ds-out{color:#9e2a20}.ds-spine{display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgb(244 243 239/.6);border-left:1px solid #e3e0d9;border-right:1px solid #e3e0d9;background-image:linear-gradient(#e0a526 50%,transparent 0);background-size:2px 10px;background-repeat:repeat-y;background-position:center}.ds-spine small{color:#66635c;background:#f4f3ef;padding:0 6px}.ds-spine b{color:#26305c;font-size:1.75rem;background:#f4f3ef;padding:0 6px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Merchant's Ledger",
+    "overview": "Budget Flow keeps money the way a merchant keeps the bahi-khata: what came in on one page, what went out on the facing page, and the balance struck at the spine. A vermilion bookcloth rail with a turmeric thread binds the app; the work happens on quiet white sheets laid on a pale ledger page, written in indigo ink.\n\nThe system is precise and quiet. Controls are standard and calm, so the numbers carry the weight: exact, tabular, signed, and always traceable to their ledger lines. Colour does real jobs (direction of money, state, the one primary action) and nothing is decoration. It is never gamified.",
+    "keyCharacteristics": [
+      "Facing-page spread with the balance struck at the spine",
+      "Vermilion rail, turmeric thread, indigo ink on a pale page",
+      "Mukta with tabular figures and one fixed money ramp",
+      "States said in words, never colour alone",
+      "Standard web controls; no ledger costume"
+    ],
+    "rules": [
+      {
+        "name": "The Facing Pages Rule",
+        "section": "overview",
+        "body": "Money in sits on the left page, money out on the right, and the balance is struck at the spine between them. Never collapse the spread into KPI cards."
+      },
+      {
+        "name": "The One Thread Rule",
+        "section": "colors",
+        "body": "Turmeric marks exactly one thing per screen: the primary action (Add transaction), plus the rail's binding edge and budget warnings. It is never text or a focus ring on light surfaces (2.2:1)."
+      },
+      {
+        "name": "The Signed Amount Rule",
+        "section": "colors",
+        "body": "Money out is vermilion, money in indigo, and every amount also carries its sign or sits under a heading that names its direction. Colour never carries meaning alone."
+      },
+      {
+        "name": "The Fixed Ramp Rule",
+        "section": "typography",
+        "body": "Amounts use only the five money sizes (2.5, 1.75, 1.25, 0.9375, 0.8125 rem) with tabular lining figures. Hierarchy is never improvised."
+      },
+      {
+        "name": "The Quiet Sheet Rule",
+        "section": "elevation",
+        "body": "Sheets lift off the page with one soft indigo-tinted shadow; nothing else casts one. Depth says 'this is a page of the book', never 'click me'."
+      }
+    ],
+    "dos": [
+      "Do format every amount with formatMoney (exact decimal strings, the reader's locale, a true minus sign).",
+      "Do say states in words: Confirming, Cancelled: <reason>, ₹1,900.00 over.",
+      "Do use the indigo focus ring (2px, 2px offset) on light surfaces and turmeric only on the vermilion rail.",
+      "Do keep controls standard web controls: native selects, date inputs, radio groups, disclosure menus.",
+      "Do give every money list a total, and let every line open to its transactions."
+    ],
+    "donts": [
+      "Don't use ruled-paper textures, stitched borders or other ledger costume on working screens.",
+      "Don't put eyebrow labels above headings or join meta with middle dots.",
+      "Don't draw icons with Unicode glyphs or emoji; use the lucide set at 1.75 stroke.",
+      "Don't gamify: no streaks, badges, confetti or mascots.",
+      "Don't spread turmeric beyond the primary action, the rail edge and warnings."
+    ]
+  }
+}

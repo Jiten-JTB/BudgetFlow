@@ -12,3 +12,4 @@ budgetflow:
         redirect-uris: http://localhost:3000/api/auth/callback
         post-logout-redirect-uris: http://localhost:3000/
         scopes: openid,profile,budgetflow.api
+    web-signup-url: https://budgetflow.test/signup

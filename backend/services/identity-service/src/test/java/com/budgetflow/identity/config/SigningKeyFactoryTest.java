@@ -37,8 +37,11 @@ class SigningKeyFactoryTest {
     @Test
     void generatesEphemeralKeyWhenAllowed() throws Exception {
         RSAKey key = SigningKeyFactory.create(new IdentityProperties.SigningKey("dev", null, true));
+        RSAKey afterRestart = SigningKeyFactory.create(new IdentityProperties.SigningKey("dev", null, true));
 
-        assertThat(key.getKeyID()).isEqualTo("dev");
+        // A fresh key needs a fresh key id, or verifiers keep using their cached key for that id.
+        assertThat(key.getKeyID()).startsWith("dev-ephemeral-");
+        assertThat(afterRestart.getKeyID()).isNotEqualTo(key.getKeyID());
         assertThat(key.toRSAPublicKey().getModulus().bitLength()).isGreaterThanOrEqualTo(2048);
     }
 

@@ -1,0 +1,11 @@
+**/node_modules
+**/.next
+**/test-results
+**/playwright-report
+**/.env*
+!**/.env.local.example
+**/.impeccable
+**/PRODUCT.md
+**/*.test.ts
+**/*.test.tsx
+apps/web/e2e

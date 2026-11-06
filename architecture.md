@@ -109,6 +109,14 @@ budgetFlow/
 └── docs/adr/                       # architecture decision records
 ```
 
+## 5b. Web App (built in Phase 4)
+
+- `frontend/` pnpm workspace: `packages/money` (exact decimal formatting/parsing), `packages/api-client` (typed, zod-validated client; reused by mobile later), `apps/web` (Next.js 16 App Router).
+- **BFF auth:** Next.js is the confidential OAuth client. Login = Authorization Code + PKCE; tokens live only in an encrypted httpOnly cookie (JWE, A256GCM). `proxy.ts` refreshes tokens a minute before expiry (rotating refresh tokens, one refresh in flight per token). Browser calls go to `/api/bff/*`, which checks Origin (CSRF), allows only `/api/v1/*`, and adds the bearer token server-side. A 401 from the API sends the user through sign-in and back.
+- Sign-up is a server action that forwards the visitor's IP so the gateway's per-IP limit applies to them.
+- Visual system: `frontend/apps/web/DESIGN.md` (tokens in `src/app/globals.css`); product context: `PRODUCT.md`.
+- Deploy: `frontend/apps/web/Dockerfile` (standalone output, non-root). Env: `AUTH_ISSUER`, `AUTH_INTERNAL_URL`, `AUTH_CLIENT_ID`, `AUTH_CLIENT_SECRET`, `APP_URL`, `API_URL`, `SESSION_SECRET` (32+ chars), `SECURE_COOKIES`.
+
 ## 6. Service Internal Structure (Hexagonal)
 
 ```
@@ -146,7 +154,7 @@ Coverage gate: 80% line on domain/application.
 
 - Traefik routing:
   - `budgetflow-api.` → api-gateway `:8080`.
-  - `budgetflow-auth.` → identity-service `:9000`, **path allow-list only**: `/oauth2/`, `/.well-known/`, `/connect/`, `/userinfo`, `/login`, `/logout`, `/error`. `/api/**` must go through the gateway (rate limits).
+  - `budgetflow-auth.` → identity-service `:9000`, **path allow-list only**: `/oauth2/`, `/.well-known/`, `/connect/`, `/userinfo`, `/login`, `/logout`, `/error`, `/css/`, `/fonts/` (branded sign-in page assets). `/api/**` must go through the gateway (rate limits).
   - Management ports (`:8081`, `:9001`: health, Prometheus) are never routed.
   - Traefik must overwrite client `X-Forwarded-For` (default when `forwardedHeaders.insecure` is off); the gateway's per-IP rate limit relies on it.
 - Each service = Docker image (layered jar, `eclipse-temurin:25-jre` / CDS-enabled; GraalVM native optional for low-traffic services).

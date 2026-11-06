@@ -26,9 +26,9 @@ final class SigningKeyFactory {
             return fromPem(config.keyId(), config.privateKey());
         }
         if (config.allowEphemeral()) {
-            log.warn("Using an EPHEMERAL signing key '{}': tokens become invalid on restart. Never use in production.",
-                    config.keyId());
-            return ephemeral(config.keyId());
+            log.warn("Using an EPHEMERAL signing key: tokens become invalid on restart. Never use in production.");
+            // A new key must carry a new key id: verifiers cache keys by id and only refetch on an unknown one.
+            return ephemeral(config.keyId() + "-ephemeral-" + java.util.UUID.randomUUID().toString().substring(0, 8));
         }
         throw new IllegalStateException(
                 "budgetflow.identity.signing-key.private-key is required (PKCS#8 PEM RSA key)");

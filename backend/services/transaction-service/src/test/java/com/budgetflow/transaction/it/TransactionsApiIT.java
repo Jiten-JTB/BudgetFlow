@@ -111,6 +111,27 @@ class TransactionsApiIT extends TransactionIntegrationTest {
     }
 
     @Test
+    void filtersByIncomeSourceAndByCategoryIncludingItsSubCategories() throws Exception {
+        String dining = id(postJson(alice, "/api/v1/categories",
+                "{\"name\":\"Dining\",\"kind\":\"EXPENSE\",\"parentId\":\"" + food + "\"}"));
+        String acme = id(postJson(alice, "/api/v1/income-sources", "{\"name\":\"Acme\",\"type\":\"SALARY\"}"));
+        record(alice, "key-filter-0001", expense("10", "2026-11-03"));                                  // Food
+        record(alice, "key-filter-0002", expense("20", "2026-11-03").replace(food, dining));            // Food > Dining
+        record(alice, "key-filter-0003", "{\"kind\":\"INCOME\",\"accountId\":\"" + account + "\",\"amount\":\"500\","
+                + "\"currency\":\"INR\",\"incomeSourceId\":\"" + acme + "\",\"occurredOn\":\"2026-11-03\"}");
+        record(alice, "key-filter-0004", "{\"kind\":\"INCOME\",\"accountId\":\"" + account + "\",\"amount\":\"7\","
+                + "\"currency\":\"INR\",\"occurredOn\":\"2026-11-03\"}");
+
+        mvc.perform(get("/api/v1/transactions").param("categoryId", food).with(user(alice)))
+                .andExpect(jsonPath("$.items", hasSize(2)));
+        mvc.perform(get("/api/v1/transactions").param("categoryId", dining).with(user(alice)))
+                .andExpect(jsonPath("$.items", hasSize(1)));
+        mvc.perform(get("/api/v1/transactions").param("incomeSourceId", acme).with(user(alice)))
+                .andExpect(jsonPath("$.items", hasSize(1)))
+                .andExpect(jsonPath("$.items[0].amount").value("500.0000"));
+    }
+
+    @Test
     void transactionsAreIsolatedPerUser() throws Exception {
         String id = id(record(alice, "key-iso-00001", expense("10", "2026-11-03")));
         UUID bob = UUID.randomUUID();

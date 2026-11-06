@@ -97,7 +97,12 @@ public class JdbcTransactionRepository implements TransactionRepository {
         filter(where, params, q.kind() == null ? null : q.kind().name(), "kind = :kind", "kind");
         filter(where, params, q.status() == null ? null : q.status().name(), "status = :status", "status");
         filter(where, params, q.accountId(), "(account_id = :accountId OR counter_account_id = :accountId)", "accountId");
-        filter(where, params, q.categoryId(), "category_id = :categoryId", "categoryId");
+        // Categories are two levels deep: a parent also covers its direct sub-categories.
+        filter(where, params, q.categoryId(), """
+                (category_id = :categoryId
+                 OR category_id IN (SELECT c.id FROM category c WHERE c.parent_id = :categoryId AND c.user_id = :userId))""",
+                "categoryId");
+        filter(where, params, q.incomeSourceId(), "income_source_id = :incomeSourceId", "incomeSourceId");
         if (after != null) {
             where.add("(occurred_on, id) < (:afterDate, :afterId)");
             params.put("afterDate", after.occurredOn());

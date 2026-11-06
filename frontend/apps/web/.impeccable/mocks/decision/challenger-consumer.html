@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Budget Flow · Warm Consumer App</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#F3EEE8;--card:#fff;--act:#2F6FED;--ink:#1F2430;--mute:#6B6F7A}
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;font-family:"Nunito Sans",sans-serif;background:var(--ground);color:var(--ink);font-variant-numeric:tabular-nums}
+header{display:flex;justify-content:space-between;align-items:center;padding:24px 64px}
+header b{font-size:22px;font-weight:800}
+header nav{display:flex;gap:28px;color:var(--mute);font-size:16px}header nav .on{color:var(--ink);font-weight:700}
+.add{background:var(--act);color:#fff;border:0;border-radius:28px;padding:14px 26px;font-weight:700;font-size:16px;font-family:inherit}
+main{padding:8px 64px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:24px}
+.c{background:var(--card);border-radius:24px;padding:28px}
+.c small{color:var(--mute);font-size:15px}.c b{display:block;font-size:40px;font-weight:800;margin-top:6px}
+.hello{grid-column:1/-1;font-size:28px;font-weight:700;padding:4px 0}
+.prog{height:12px;background:#ECE7E1;border-radius:6px;margin-top:18px}.prog i{display:block;height:100%;width:69%;background:var(--ink);border-radius:6px}
+.list{grid-column:1/3}.bud{grid-column:3}
+h2{font-size:19px;margin-bottom:14px}
+.r{display:flex;justify-content:space-between;padding:12px 0;font-size:16px}.r+.r{border-top:1px solid #F0ECE7}
+.r em{font-style:normal;color:var(--mute);font-size:14px;display:block}
+</style></head><body>
+<header><b>Budget Flow</b><nav><span class="on">Home</span><span>Activity</span><span>Accounts</span><span>Budgets</span></nav><button class="add">+ Add</button></header>
+<main>
+<div class="hello">Good evening, Ananya</div>
+<div class="c"><small>You have</small><b>₹6,42,915</b></div>
+<div class="c"><small>In this month</small><b>₹1,24,500</b></div>
+<div class="c"><small>Spent this month</small><b>₹86,320</b><div class="prog"><i></i></div></div>
+<div class="c list"><h2>Recent</h2>
+<div class="r"><span>Swiggy dinner<em>Food &amp; Dining · ICICI card</em></span><span>−₹640</span></div>
+<div class="r"><span>Acme Corp salary<em>Salary · HDFC</em></span><span>+₹1,10,000</span></div>
+<div class="r"><span>BigBasket groceries<em>Groceries · HDFC</em></span><span>−₹2,315</span></div></div>
+<div class="c bud"><h2>Budgets</h2>
+<div class="r"><span>Food &amp; Dining</span><span>84%</span></div><div class="r"><span>Transport</span><span>52%</span></div><div class="r"><span>Shopping</span><span>132%</span></div></div>
+</main></body></html>
