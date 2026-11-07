@@ -1,6 +1,7 @@
 name: frontend
 
 on:
+  workflow_call: {}   # release.yml runs this as its gate
   push:
     branches: [main]
     paths: ["frontend/**", ".github/workflows/frontend.yml"]

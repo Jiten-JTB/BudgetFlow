@@ -42,7 +42,7 @@ Rule for every phase: **write unit + integration tests first, then implement** u
 
 ## Phase 6 — Production
 - [ ] Observability stack (Prometheus, Grafana, Loki, OTel)
-- [ ] Dokploy deployment on Hostinger VPS, domains, TLS, backups
+- [ ] Dokploy deployment on Hostinger VPS, domains, TLS, backups (artifacts ready + verified locally; awaiting first release)
 - [ ] Security review, load test, runbooks
 
 ## Phase 7 — Mobile

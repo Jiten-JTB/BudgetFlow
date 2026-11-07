@@ -1,8 +1,8 @@
 # Budget Flow — Current State
 
-_Last updated: 2026-11-06 (Phase 4)_
+_Last updated: 2026-11-06 (deployment prep)_
 
-**Phase:** 4 — Web app ✅ complete. Next: Phase 5 (reporting-service, notification-service) or production deployment (Phase 6), user's call.
+**Phase:** 4 — Web app ✅ complete. Now: production deployment (Phase 6). Artifacts ready and verified locally; waiting for the user to tag a release and create the Dokploy service (`infra/deploy/README.md`).
 
 ## Done
 - Docs: `architecture.md`, `plan.md`, `memory.md`, `CLAUDE.md`
@@ -60,6 +60,26 @@ _Last updated: 2026-11-06 (Phase 4)_
 - Notes: impeccable telemetry disabled via `IMPECCABLE_NO_TELEMETRY=1`; never `pkill -f serve-question` (kills own shell).
 
 - Totals at end of Phase 4: backend 267 tests; frontend 102 unit tests (money 11, api-client 9, web 82); 8 Playwright E2E tests incl. axe WCAG 2.2 AA on 10 screens.
+
+## Deployment prep (resume here)
+- `infra/deploy/docker-compose.prod.yml`: one Dokploy Compose service. GHCR images at `IMAGE_TAG`, no host ports, memory caps (~5 GB total, ~1.6 GB idle), log rotation. Only web, gateway and identity join `dokploy-network`; internal calls use `budgetflow-*` aliases on a private network. Traefik labels cover HTTP→HTTPS, letsencrypt, HSTS and the auth path allow-list. Postgres init creates a role per service with its own password. `postgres-backup` sidecar writes daily dumps with 14-day retention.
+- `infra/deploy/generate-secrets.sh`: hex secrets plus a single-line 3072-bit PKCS#8 signing key, written to `.env.prod` (git-ignored, mode 600).
+- `.github/workflows/release.yml`: runs on a `v*.*.*` tag, reruns backend and frontend CI (both now `workflow_call`), then pushes 7 amd64 images to `ghcr.io/jiten-jtb/budgetflow-*`.
+- `infra/deploy/test-deploy.sh`: 49 static checks, all green.
+- Verified locally: prod compose with retagged images behind Traefik 3.6 (Dokploy-like entrypoints and `redirect-to-https@file`).
+  - All 11 containers healthy.
+  - 301 to https; the auth allow-list serves login, css and fonts and returns 404 for `/api` and `/actuator`.
+  - Issuer is `https://budgetflow-auth.jitenjtb.com`; HSTS is set.
+  - DB role isolation holds; dumps were written and restored into a fresh database.
+  - E2E 8/8 over HTTPS with the real hostnames mapped locally.
+- Next, the user's steps:
+  1. Run the preflight on the VPS.
+  2. Generate secrets.
+  3. Push tag `v0.1.0`.
+  4. Make the GHCR packages public.
+  5. Create the Compose service in Dokploy.
+  6. Verify.
+- Off-VPS backup copy is still open; Dokploy S3 backup needs the panel owner's OK.
 
 ## Commands
 - Build + all tests: `cd backend && ./mvnw verify`

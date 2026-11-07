@@ -159,9 +159,9 @@ Coverage gate: 80% line on domain/application.
   - Traefik must overwrite client `X-Forwarded-For` (default when `forwardedHeaders.insecure` is off); the gateway's per-IP rate limit relies on it.
 - Each service = Docker image (layered jar, `eclipse-temurin:25-jre` / CDS-enabled; GraalVM native optional for low-traffic services).
 - JVM tuned for containers: `-XX:MaxRAMPercentage=75`, virtual threads on.
-- Dokploy manages: Postgres, RabbitMQ, Redis, services, Traefik domains (see §10).
+- One Dokploy Compose service (`infra/deploy/docker-compose.prod.yml`) runs Postgres, RabbitMQ, Redis, all services and web, using images from GHCR built by `release.yml`. Routing comes from Traefik labels in that file, not Dokploy's Domains tab. Only web, gateway and identity join `dokploy-network`; everything else stays on a private network under `budgetflow-*` aliases. Runbook: `infra/deploy/README.md`.
 - Domains: see §10.
-- Daily Postgres backups (Dokploy backup → S3-compatible storage).
+- Daily Postgres dumps by the `postgres-backup` sidecar (volume, 14-day retention); off-VPS copy required (Dokploy S3 backup with the panel owner's OK, or scp).
 - Health: Spring Actuator liveness/readiness used by Dokploy.
 
 ## 10. Domains
