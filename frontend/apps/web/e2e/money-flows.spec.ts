@@ -21,7 +21,8 @@ test("a new user records income, spending and a transfer, and every total agrees
 
   // Income
   await goto(page, "/transactions/new?kind=INCOME");
-  await page.getByLabel("Amount").fill("1,10,000");
+  await page.getByLabel("Amount").pressSequentially("110000"); // typed digit by digit, grouped as it goes
+  await expect(page.getByLabel("Amount")).toHaveValue("1,10,000");
   await page.getByLabel("Account").selectOption({ label: "HDFC Savings (INR)" });
   await page.getByLabel("Income source").selectOption({ label: "Acme Corp" });
   await page.getByLabel("Description").fill("November salary");

@@ -1,9 +1,11 @@
 "use client";
 
 import type { ApiClient } from "@budgetflow/api-client";
-import { compareAmounts, MoneyInputError, parseAmountInput } from "@budgetflow/money";
+import { compareAmounts, formatAmountInput, MoneyInputError, parseAmountInput } from "@budgetflow/money";
 import { useRouter } from "next/navigation";
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+import { AmountInput } from "@/components/amount-input";
+import { navigatorLocale } from "@/lib/navigator-locale";
 import { browserApi, dangerButton, Field, FormAlert, inputClass, primaryButton, quietButton, useSubmit } from "@/components/form-kit";
 
 type CategoryOption = { id: string; name: string; kind: "INCOME" | "EXPENSE"; parentId: string | null };
@@ -70,8 +72,7 @@ export function CreateBudgetForm({ baseCurrency, categories, api, onDone }: {
           {(p) => <input {...p} maxLength={100} value={name} onChange={(e) => { setName(e.target.value); setNameEdited(true); }} className={inputClass} />}
         </Field>
         <Field id={`${id}-limit`} label="Limit" hint={baseCurrency} error={errors.limit}>
-          {(p) => <input {...p} inputMode="decimal" autoComplete="off" value={limit} placeholder="10000"
-            onChange={(e) => setLimit(e.target.value)} className={`${inputClass} num`} />}
+          {(p) => <AmountInput {...p} value={limit} placeholder="10,000" onValueChange={setLimit} className={`${inputClass} num`} />}
         </Field>
         <Field id={`${id}-period`} label="Period">
           {(p) => (
@@ -98,6 +99,8 @@ export function BudgetLimitForm({ budget, api, onDone }: {
   const client = useMemo(() => api ?? browserApi().budgets, [api]);
   const id = useId();
   const [limit, setLimit] = useState(trimZeros(budget.limit));
+  // Group the saved limit in the browser's locale after hydration, so server and client render the same text.
+  useEffect(() => setLimit((v) => formatAmountInput(v, { locale: navigatorLocale() })), []);
   const [threshold, setThreshold] = useState(String(budget.alertThresholdPercent));
   const [errors, setErrors] = useState<{ limit?: string; threshold?: string }>({});
   const { submit, busy, error } = useSubmit(() => client.update(budget.id, { limit: parseAmountInput(limit), alertThresholdPercent: Number(threshold) }),
@@ -111,7 +114,7 @@ export function BudgetLimitForm({ budget, api, onDone }: {
       if (!next.limit && !next.threshold) void submit();
     }}>
       <Field id={`${id}-limit`} label="Limit" hint={budget.currency} error={errors.limit}>
-        {(p) => <input {...p} inputMode="decimal" value={limit} onChange={(e) => setLimit(e.target.value)} className={`${inputClass} num w-36`} />}
+        {(p) => <AmountInput {...p} value={limit} onValueChange={setLimit} className={`${inputClass} num w-36`} />}
       </Field>
       <Field id={`${id}-threshold`} label="Warn me at" hint="%" error={errors.threshold}>
         {(p) => <input {...p} inputMode="numeric" value={threshold} onChange={(e) => setThreshold(e.target.value)} className={`${inputClass} num w-20`} />}

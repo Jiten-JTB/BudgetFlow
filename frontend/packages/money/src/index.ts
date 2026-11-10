@@ -98,3 +98,54 @@ function fromUnits(units: bigint): string {
   const fraction = (abs % SCALE_FACTOR).toString().padStart(SCALE, "0");
   return `${negative ? "-" : ""}${whole}.${fraction}`;
 }
+
+const groupFormatters = new Map<string, Intl.NumberFormat>();
+const SIGNIFICANT = /[\d.-]/;
+
+/**
+ * Groups an amount while it is being typed ("175000" → "1,75,000" in en-IN, "175,000" in en-US). Grouping follows the
+ * locale, but the separator is always "," and the point always ".", so parseAmountInput reads the result back exactly.
+ * Digits are never added, dropped or rounded; anything that is not a digit, the first point or a leading minus is removed.
+ */
+export function formatAmountInput(raw: string, options: { locale?: string; allowNegative?: boolean } = {}): string {
+  const firstSignificant = raw.match(SIGNIFICANT)?.[0];
+  const negative = options.allowNegative === true && firstSignificant === "-";
+  const kept = raw.replace(/[^\d.]/g, "");
+  const point = kept.indexOf(".");
+  const hasPoint = point >= 0;
+  const integer = (hasPoint ? kept.slice(0, point) : kept).replace(/^0+(?=\d)/, "");
+  const fraction = hasPoint ? kept.slice(point + 1).replace(/\./g, "") : "";
+  const sign = negative ? "-" : "";
+  if (!integer && !hasPoint) return sign;
+  return `${sign}${integer ? groupDigits(integer, options.locale) : "0"}${hasPoint ? `.${fraction}` : ""}`;
+}
+
+/** How many characters that survive formatting (digits, point, minus) sit before the caret. */
+export function countSignificantBefore(value: string, caret: number): number {
+  let count = 0;
+  for (const ch of value.slice(0, caret)) if (SIGNIFICANT.test(ch)) count++;
+  return count;
+}
+
+/** Caret index in the formatted value that follows the same number of significant characters. */
+export function caretAfterFormat(formatted: string, significantBefore: number): number {
+  if (significantBefore <= 0) return 0;
+  let seen = 0;
+  for (let i = 0; i < formatted.length; i++) {
+    if (SIGNIFICANT.test(formatted[i]!) && ++seen === significantBefore) return i + 1;
+  }
+  return formatted.length;
+}
+
+function groupDigits(digits: string, locale: string | undefined): string {
+  const key = locale ?? "";
+  let formatter = groupFormatters.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, { useGrouping: true, maximumFractionDigits: 0, numberingSystem: "latn" });
+    groupFormatters.set(key, formatter);
+  }
+  // BigInt keeps every digit exact; only the locale's grouping pattern is used, with "," as the separator.
+  return formatter.formatToParts(BigInt(digits))
+    .map((part) => (part.type === "integer" ? part.value : part.type === "group" ? "," : ""))
+    .join("");
+}

@@ -49,9 +49,10 @@ describe("BudgetLimitForm", () => {
     render(<BudgetLimitForm budget={{ id: "b1", limit: "10000.0000", alertThresholdPercent: 80, currency: "INR" }} api={{ update }} onDone={vi.fn()} />);
 
     const limit = screen.getByLabelText("Limit");
-    expect(limit).toHaveValue("10000");
+    expect(limit).toHaveValue("10,000"); // grouped for reading
     await user.clear(limit);
     await user.type(limit, "12500");
+    expect(limit).toHaveValue("12,500");
     await user.clear(screen.getByLabelText("Warn me at"));
     await user.type(screen.getByLabelText("Warn me at"), "90");
     await user.click(screen.getByRole("button", { name: "Save" }));

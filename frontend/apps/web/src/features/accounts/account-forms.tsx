@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import { ACCOUNT_TYPES } from "./account-types";
 import { CURRENCIES } from "@/lib/reference-data/currencies";
+import { AmountInput } from "@/components/amount-input";
 import { browserApi, dangerButton, Field, FormAlert, inputClass, primaryButton, quietButton, useSubmit } from "@/components/form-kit";
 
 
@@ -76,8 +77,8 @@ export function OpenAccountForm({ baseCurrency, api, navigate }: {
         </Field>
       </div>
       <Field id={`${id}-balance`} label="Current balance" hint="Negative for money owed, like a card balance" error={errors.balance}>
-        {(p) => <input {...p} inputMode="decimal" autoComplete="off" value={balance} placeholder="0.00"
-          onChange={(e) => setBalance(e.target.value)} className={`${inputClass} num max-w-xs`} />}
+        {(p) => <AmountInput {...p} allowNegative value={balance} placeholder="0.00"
+          onValueChange={setBalance} className={`${inputClass} num max-w-xs`} />}
       </Field>
       <FormAlert>{error}</FormAlert>
       <div><button type="submit" disabled={busy} className={primaryButton}>{busy ? "Opening…" : "Open account"}</button></div>
@@ -125,8 +126,8 @@ export function AdjustBalanceForm({ account, api, onDone, newKey = () => crypto.
       </p>
       <div className="grid gap-4 sm:grid-cols-[12rem_1fr]">
         <Field id={`${id}-amount`} label="Change by" hint={account.currency} error={amountError}>
-          {(p) => <input {...p} inputMode="decimal" autoComplete="off" value={amount} placeholder="-250 or 1000"
-            onChange={(e) => setAmount(e.target.value)} className={`${inputClass} num`} />}
+          {(p) => <AmountInput {...p} allowNegative value={amount} placeholder="-250 or 1,000"
+            onValueChange={setAmount} className={`${inputClass} num`} />}
         </Field>
         <Field id={`${id}-note`} label="Note">
           {(p) => <input {...p} maxLength={200} value={note} placeholder="e.g. Matched bank statement"

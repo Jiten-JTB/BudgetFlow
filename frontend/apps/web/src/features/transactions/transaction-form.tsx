@@ -4,7 +4,9 @@ import { ApiError, createApiClient, type RecordTransactionInput, type Transactio
 import { formatMoney } from "@budgetflow/money";
 import Link from "next/link";
 import { useId, useMemo, useRef, useState } from "react";
+import { AmountInput } from "@/components/amount-input";
 import { Field, inputClass } from "@/components/form-kit";
+import { navigatorLocale } from "@/lib/navigator-locale";
 import { awaitOutcome } from "./await-outcome";
 import { type FieldErrors, type FormState, type Kind, toRecordInput } from "./form-model";
 
@@ -157,8 +159,8 @@ export function TransactionForm({ accounts, categories, incomeSources, today, in
 
           <Field id={`${id}-amount`} label="Amount" hint={account ? account.currency : undefined} error={errors.amount}>
             {(props) => (
-              <input {...props} ref={amountRef} autoFocus type="text" inputMode="decimal" autoComplete="off"
-                placeholder="0.00" value={form.amount} onChange={(e) => set("amount", e.target.value)}
+              <AmountInput {...props} ref={amountRef} autoFocus
+                placeholder="0.00" value={form.amount} onValueChange={(v) => set("amount", v)}
                 className={`${inputClass} num max-w-xs text-money-lg font-semibold text-indigo`} />
             )}
           </Field>
@@ -245,10 +247,6 @@ function categoryOptions(categories: CategoryOption[], kind: "INCOME" | "EXPENSE
     ...ofKind.filter((c) => c.parentId === p.id).sort((a, b) => a.name.localeCompare(b.name))
       .map((c) => ({ id: c.id, label: `${p.name} › ${c.name}` })),
   ]);
-}
-
-function navigatorLocale(): string {
-  return typeof navigator === "undefined" ? "en-IN" : navigator.language || "en-IN";
 }
 
 function lowerFirst(s: string): string {

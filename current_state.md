@@ -94,6 +94,18 @@ _Last updated: 2026-11-10 (deployed + Grafana)_
 - Verified locally: all 15 containers up, 7/7 targets up, every dashboard query returns data, E2E money flows pass, log levels extracted.
 - Open: alert contact point (email or Telegram?) and OTel traces.
 
+## Amount input grouping (2026-11-10)
+- Amounts are grouped as you type in all 5 amount fields: transaction, opening balance, adjustment, new budget limit, and edit budget limit.
+  - en-IN: 17,500 and 1,75,000. Other locales: 175,000.
+  - The separator is always ",", so `parseAmountInput` reads it back exactly.
+- `@budgetflow/money` adds `formatAmountInput`, `countSignificantBefore` and `caretAfterFormat`. Formatting is exact (BigInt) and never rounds.
+- New `src/components/amount-input.tsx`:
+  - Keeps the caret in place.
+  - Backspace or Delete on a comma removes the neighbouring digit.
+  - Accepts a minus only with `allowNegative`, and those fields use `inputMode="text"` because phone decimal pads have no minus key.
+- `navigatorLocale` moved to `src/lib/navigator-locale.ts`. The edit-budget form groups the saved limit after mount to avoid a hydration mismatch.
+- Tests: money 31, web 88; E2E 8/8 (money flow types `110000` digit by digit and expects `1,10,000`). Ships with the next release tag.
+
 ## Commands
 - Build + all tests: `cd backend && ./mvnw verify`
 - Local infra: `docker compose -f infra/docker-compose.yml up -d`
