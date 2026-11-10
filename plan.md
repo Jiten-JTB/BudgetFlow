@@ -41,8 +41,8 @@ Rule for every phase: **write unit + integration tests first, then implement** u
 - [ ] `notification-service` (budget alerts, email)
 
 ## Phase 6 — Production
-- [ ] Observability stack (Prometheus, Grafana, Loki, OTel)
-- [ ] Dokploy deployment on Hostinger VPS, domains, TLS, backups (artifacts ready + verified locally; awaiting first release)
+- [x] Observability stack: Prometheus, Grafana, Loki, Alloy (OTel traces and alert contact point still to do)
+- [x] Dokploy deployment on Hostinger VPS, domains, TLS, backups (live 2026-11-10 at admin.conceptkart.co.in)
 - [ ] Security review, load test, runbooks
 
 ## Phase 7 — Mobile

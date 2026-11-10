@@ -163,6 +163,10 @@ Coverage gate: 80% line on domain/application.
 - Domains: see §10.
 - Daily Postgres dumps by the `postgres-backup` sidecar (volume, 14-day retention); off-VPS copy required (Dokploy S3 backup with the panel owner's OK, or scp).
 - Health: Spring Actuator liveness/readiness used by Dokploy.
+- Observability (same compose):
+  - Prometheus scrapes the management ports (actuator is anonymous there only, matched by the socket's local port) plus RabbitMQ per queue.
+  - Alloy ships this project's container logs (ECS JSON) to Loki.
+  - Grafana is the only routed piece, with provisioned read-only dashboards in `infra/deploy/observability/`.
 
 ## 10. Domains
 
@@ -172,7 +176,7 @@ Coverage gate: 80% line on domain/application.
 | `budgetflow-api.jitenjtb.com` | API gateway (web + mobile clients) | Yes |
 | `budgetflow-auth.jitenjtb.com` | identity-service OAuth2/OIDC issuer (login pages, tokens) | Yes |
 | `admin.conceptkart.co.in` | Dokploy panel, VPS 89.116.21.116 (**ask first, nothing critical or experimental**) | Admin only |
-| `budgetflow-grafana.jitenjtb.com` | Monitoring dashboards (proposed, not confirmed) | Admin only |
+| `budgetflow-grafana.jitenjtb.com` | Grafana (Prometheus metrics + Loki logs), login required | Admin only |
 
 DNS: A records to the VPS. TLS via Traefik + Let's Encrypt. RabbitMQ/Postgres/Redis admin stay internal (SSH tunnel).
 

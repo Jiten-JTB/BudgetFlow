@@ -38,6 +38,8 @@ WEB_SESSION_SECRET=$(secret)
 IDENTITY_SIGNING_KEY_ID=budgetflow-$(date -u +%Y-%m)
 IDENTITY_SIGNING_KEY_PEM=${signing_key}
 
+GRAFANA_ADMIN_PASSWORD=$(secret)
+
 # Days of daily database dumps kept on the VPS
 BACKUP_RETENTION_DAYS=14
 EOF

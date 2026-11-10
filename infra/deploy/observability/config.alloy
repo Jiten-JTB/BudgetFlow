@@ -1,0 +1,41 @@
+// Ships container logs of this compose project only (never other apps on the VPS) to Loki.
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "budgetflow" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+    regex         = sys.env("BUDGETFLOW_COMPOSE_PROJECT")
+    action        = "keep"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+loki.source.docker "containers" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.budgetflow.output
+  forward_to = [loki.process.levels.receiver]
+}
+
+// JVM services log ECS JSON: lift log.level into a label so errors are one click away.
+loki.process "levels" {
+  stage.json {
+    expressions = { level = "log.level" }   // ECS nests it: {"log":{"level":"INFO"}}
+  }
+  stage.labels {
+    values = { level = "" }
+  }
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://budgetflow-loki:3100/loki/api/v1/push"
+  }
+}

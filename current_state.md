@@ -1,8 +1,8 @@
 # Budget Flow — Current State
 
-_Last updated: 2026-11-06 (deployment prep)_
+_Last updated: 2026-11-10 (deployed + Grafana)_
 
-**Phase:** 4 — Web app ✅ complete. Now: production deployment (Phase 6). Artifacts ready and verified locally; waiting for the user to tag a release and create the Dokploy service (`infra/deploy/README.md`).
+**Phase:** 6 — Production. v0.1.0 is **live** on Dokploy `admin.conceptkart.co.in` (VPS 89.116.21.116; project MicroServices / production, service budgetFlow), checked from outside on 2026-11-10. Grafana stack is built and verified locally; it needs release v0.1.1 plus `GRAFANA_ADMIN_PASSWORD` in Dokploy.
 
 ## Done
 - Docs: `architecture.md`, `plan.md`, `memory.md`, `CLAUDE.md`
@@ -81,6 +81,19 @@ _Last updated: 2026-11-06 (deployment prep)_
   6. Verify.
 - Off-VPS backup copy is still open; Dokploy S3 backup needs the panel owner's OK.
 
+## Observability (resume here)
+- Added to the prod compose: Prometheus v3.5.0, Loki 3.5.0, Alloy v1.10.0 and Grafana 12.1.1. Configs live in `infra/deploy/observability/`. Grafana is routed at `budgetflow-grafana.jitenjtb.com`; the rest is internal.
+- JVM services get `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` and http.server.requests histograms through `SPRING_APPLICATION_JSON`, with no image change. Orchestrator gained the alias `budgetflow-orchestrator`.
+- Backend fix (requires a release):
+  - Resource servers and the gateway returned 401 to Prometheus on the management port.
+  - Actuator is now permitted only when the connection's local port is the separate management port. Code: `ManagementPort` / `actuatorOnManagementPort` in common-security, plus the gateway equivalent.
+  - The public port still returns 401.
+  - Tests: `ManagementPortSecurityTest` (3) and 2 new tests in `GatewayIT`.
+- Fixed a flaky `GatewayIT` registration rate-limit test (the limiter refills in whole seconds, so a sign-up now costs 60 tokens).
+- Backend: 272 tests green. `test-deploy.sh`: all checks pass.
+- Verified locally: all 15 containers up, 7/7 targets up, every dashboard query returns data, E2E money flows pass, log levels extracted.
+- Open: alert contact point (email or Telegram?) and OTel traces.
+
 ## Commands
 - Build + all tests: `cd backend && ./mvnw verify`
 - Local infra: `docker compose -f infra/docker-compose.yml up -d`
@@ -91,7 +104,7 @@ _Last updated: 2026-11-06 (deployment prep)_
 - Phase 4: Next.js web app (pnpm workspace, BFF auth, design system via UI skills); Update/Delete transaction sagas with the edit UI
 
 ## Open Decisions
-- Grafana: **on hold** (user's call). Domain `budgetflow-grafana.jitenjtb.com` exists.
+- Grafana: built (2026-11-10). Open: alert contact point (email or Telegram).
 - Email provider for notification-service
 
 ## Notes

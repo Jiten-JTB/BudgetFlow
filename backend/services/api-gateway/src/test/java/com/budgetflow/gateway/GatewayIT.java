@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.web.server.LocalManagementPort;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -52,10 +53,11 @@ class GatewayIT {
         registry.add("budgetflow.gateway.jwt.issuer", () -> StubUpstream.ISSUER);
         registry.add("budgetflow.gateway.jwt.jwk-set-uri", () -> UPSTREAM.baseUrl() + "/oauth2/jwks");
         registry.add("budgetflow.gateway.cors.allowed-origins", () -> ALLOWED_ORIGIN);
-        // Registration: burst of 2, effectively no refill during the test.
+        // Registration: 2 sign-ups per IP. Each costs 60 tokens and refill is 1/s, so crossing a second boundary
+        // mid-test (the limiter refills in whole seconds) can never pay for a third one.
         registry.add("budgetflow.gateway.rate-limit.registration.replenish-rate", () -> 1);
-        registry.add("budgetflow.gateway.rate-limit.registration.burst-capacity", () -> 2);
-        registry.add("budgetflow.gateway.rate-limit.registration.requested-tokens", () -> 1);
+        registry.add("budgetflow.gateway.rate-limit.registration.burst-capacity", () -> 120);
+        registry.add("budgetflow.gateway.rate-limit.registration.requested-tokens", () -> 60);
     }
 
     @TestConfiguration(proxyBeanMethods = false)
@@ -68,6 +70,7 @@ class GatewayIT {
     }
 
     @LocalServerPort int port;
+    @LocalManagementPort int managementPort;
     WebTestClient client;
 
     @BeforeEach
@@ -191,6 +194,19 @@ class GatewayIT {
     void returnsNotFoundForUnknownRoutes() throws Exception {
         client.get().uri("/api/v1/nope").header(HttpHeaders.AUTHORIZATION, "Bearer " + UPSTREAM.validToken("u"))
                 .exchange().expectStatus().isNotFound();
+    }
+
+    @Test
+    void servesMetricsOnTheManagementPortWithoutAToken() {
+        WebTestClient.bindToServer().baseUrl("http://localhost:" + managementPort).build()
+                .get().uri("/actuator/prometheus").exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).value(body -> assertThat(body).contains("jvm_memory_used_bytes"));
+    }
+
+    @Test
+    void neverServesActuatorAnonymouslyOnThePublicPort() {
+        client.get().uri("/actuator/prometheus").exchange().expectStatus().isUnauthorized();
     }
 
     private WebTestClient.ResponseSpec register(String clientIp) {

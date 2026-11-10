@@ -1,0 +1,20 @@
+# Scrapes Budget Flow only, over the private network. Management ports are never routed publicly.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: budgetflow-services
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - { targets: [budgetflow-identity:9001],     labels: { service: identity-service } }
+      - { targets: [budgetflow-account:8111],      labels: { service: account-service } }
+      - { targets: [budgetflow-transaction:8121],  labels: { service: transaction-service } }
+      - { targets: [budgetflow-budget:8131],       labels: { service: budget-service } }
+      - { targets: [budgetflow-orchestrator:8141], labels: { service: orchestrator-service } }
+      - { targets: [budgetflow-gateway:8081],      labels: { service: api-gateway } }
+
+  - job_name: rabbitmq
+    metrics_path: /metrics/per-object   # per-queue depth, including dead-letter queues
+    static_configs:
+      - { targets: [budgetflow-rabbitmq:15692], labels: { service: rabbitmq } }

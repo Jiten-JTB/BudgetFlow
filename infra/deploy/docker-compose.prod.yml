@@ -3,7 +3,7 @@
 # - Only web, api-gateway and identity-service join the shared dokploy-network (Traefik). Everything else,
 #   including all service-to-service calls, stays on the private "internal" network under budgetflow-* aliases,
 #   so names never clash with other apps on the shared panel.
-# - No host ports. Management ports (health, Prometheus) are never routed.
+# - No host ports. Management ports (health, Prometheus) are never routed. Grafana is the only routed observability service.
 
 x-defaults: &defaults
   restart: unless-stopped
@@ -25,6 +25,11 @@ x-rabbit: &rabbit
 x-issuer: &issuer
   IDENTITY_JWKS_URI: http://budgetflow-identity:9000/oauth2/jwks
   IDENTITY_ISSUER: https://budgetflow-auth.jitenjtb.com
+
+# Structured (ECS JSON) logs for Loki and latency histograms for p95 panels, without rebuilding images.
+x-observability: &observability
+  LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+  SPRING_APPLICATION_JSON: '{"management":{"metrics":{"distribution":{"percentiles-histogram":{"http.server.requests":true}}}}}'
 
 x-backend-deps: &backend-deps
   postgres: { condition: service_healthy }
@@ -127,7 +132,7 @@ services:
     <<: *jvm
     image: ghcr.io/jiten-jtb/budgetflow-identity-service:${IMAGE_TAG:?set IMAGE_TAG to a release tag}
     environment:
-      <<: *rabbit
+      <<: [*rabbit, *observability]
       IDENTITY_ISSUER: https://budgetflow-auth.jitenjtb.com
       IDENTITY_SIGNING_KEY_ID: ${IDENTITY_SIGNING_KEY_ID:?set IDENTITY_SIGNING_KEY_ID}
       IDENTITY_SIGNING_KEY_PEM: ${IDENTITY_SIGNING_KEY_PEM:?set IDENTITY_SIGNING_KEY_PEM}
@@ -167,7 +172,7 @@ services:
     <<: *jvm
     image: ghcr.io/jiten-jtb/budgetflow-account-service:${IMAGE_TAG:?set IMAGE_TAG to a release tag}
     environment:
-      <<: [*rabbit, *issuer]
+      <<: [*rabbit, *issuer, *observability]
       ACCOUNT_DB_URL: jdbc:postgresql://budgetflow-postgres:5432/account_db
       ACCOUNT_DB_USER: account_svc
       ACCOUNT_DB_PASSWORD: ${ACCOUNT_DB_PASSWORD:?set ACCOUNT_DB_PASSWORD}
@@ -179,7 +184,7 @@ services:
     <<: *jvm
     image: ghcr.io/jiten-jtb/budgetflow-transaction-service:${IMAGE_TAG:?set IMAGE_TAG to a release tag}
     environment:
-      <<: [*rabbit, *issuer]
+      <<: [*rabbit, *issuer, *observability]
       TRANSACTION_DB_URL: jdbc:postgresql://budgetflow-postgres:5432/transaction_db
       TRANSACTION_DB_USER: transaction_svc
       TRANSACTION_DB_PASSWORD: ${TRANSACTION_DB_PASSWORD:?set TRANSACTION_DB_PASSWORD}
@@ -191,7 +196,7 @@ services:
     <<: *jvm
     image: ghcr.io/jiten-jtb/budgetflow-budget-service:${IMAGE_TAG:?set IMAGE_TAG to a release tag}
     environment:
-      <<: [*rabbit, *issuer]
+      <<: [*rabbit, *issuer, *observability]
       BUDGET_DB_URL: jdbc:postgresql://budgetflow-postgres:5432/budget_db
       BUDGET_DB_USER: budget_svc
       BUDGET_DB_PASSWORD: ${BUDGET_DB_PASSWORD:?set BUDGET_DB_PASSWORD}
@@ -203,18 +208,19 @@ services:
     <<: *jvm
     image: ghcr.io/jiten-jtb/budgetflow-orchestrator-service:${IMAGE_TAG:?set IMAGE_TAG to a release tag}
     environment:
-      <<: *rabbit
+      <<: [*rabbit, *observability]
       ORCHESTRATOR_DB_URL: jdbc:postgresql://budgetflow-postgres:5432/orchestrator_db
       ORCHESTRATOR_DB_USER: orchestrator_svc
       ORCHESTRATOR_DB_PASSWORD: ${ORCHESTRATOR_DB_PASSWORD:?set ORCHESTRATOR_DB_PASSWORD}
-    networks: [internal]
+    networks:
+      internal: { aliases: [budgetflow-orchestrator] }
     depends_on: *backend-deps
 
   api-gateway:
     <<: *jvm
     image: ghcr.io/jiten-jtb/budgetflow-api-gateway:${IMAGE_TAG:?set IMAGE_TAG to a release tag}
     environment:
-      <<: *issuer
+      <<: [*issuer, *observability]
       IDENTITY_URI: http://budgetflow-identity:9000
       ACCOUNT_URI: http://budgetflow-account:8110
       TRANSACTION_URI: http://budgetflow-transaction:8120
@@ -282,7 +288,117 @@ services:
       traefik.http.middlewares.budgetflow-hsts.headers.stsSeconds: "31536000"
       traefik.http.services.budgetflow-web.loadbalancer.server.port: "3000"
 
+  # --- Observability (Grafana at budgetflow-grafana.jitenjtb.com; the rest stays internal) --------------
+  prometheus:
+    <<: *defaults
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --storage.tsdb.retention.size=2GB
+    configs:
+      - source: prometheus
+        target: /etc/prometheus/prometheus.yml
+    volumes:
+      - prometheus-data:/prometheus
+    networks:
+      internal: { aliases: [budgetflow-prometheus] }
+    deploy:
+      resources:
+        limits: { memory: 512m }
+
+  loki:
+    <<: *defaults
+    image: grafana/loki:3.5.0
+    command: ["-config.file=/etc/loki/config.yml"]
+    configs:
+      - source: loki
+        target: /etc/loki/config.yml
+    volumes:
+      - loki-data:/loki
+    networks:
+      internal: { aliases: [budgetflow-loki] }
+    deploy:
+      resources:
+        limits: { memory: 512m }
+
+  alloy:
+    <<: *defaults
+    image: grafana/alloy:v1.10.0
+    command: ["run", "--storage.path=/var/lib/alloy/data", "/etc/alloy/config.alloy"]
+    environment:
+      BUDGETFLOW_COMPOSE_PROJECT: ${COMPOSE_PROJECT_NAME}   # Dokploy's project name: only this stack's logs
+    configs:
+      - source: alloy
+        target: /etc/alloy/config.alloy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [internal]
+    depends_on: [loki]
+    deploy:
+      resources:
+        limits: { memory: 256m }
+
+  grafana:
+    <<: *defaults
+    image: grafana/grafana:12.1.1
+    environment:
+      GF_SERVER_ROOT_URL: https://budgetflow-grafana.jitenjtb.com
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD}
+      GF_SECURITY_COOKIE_SECURE: "true"
+      GF_SECURITY_DISABLE_GRAVATAR: "true"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+    configs:
+      - source: grafana-datasources
+        target: /etc/grafana/provisioning/datasources/datasources.yml
+      - source: grafana-dashboards
+        target: /etc/grafana/provisioning/dashboards/dashboards.yml
+      - source: grafana-dashboard-overview
+        target: /etc/grafana/dashboards/budgetflow-overview.json
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      internal: {}
+      dokploy-network: {}
+    depends_on: [prometheus, loki]
+    deploy:
+      resources:
+        limits: { memory: 256m }
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: dokploy-network
+      traefik.http.routers.budgetflow-grafana.rule: Host(`budgetflow-grafana.jitenjtb.com`)
+      traefik.http.routers.budgetflow-grafana.entrypoints: web
+      traefik.http.routers.budgetflow-grafana.middlewares: redirect-to-https@file
+      traefik.http.routers.budgetflow-grafana.service: budgetflow-grafana
+      traefik.http.routers.budgetflow-grafana-secure.rule: Host(`budgetflow-grafana.jitenjtb.com`)
+      traefik.http.routers.budgetflow-grafana-secure.entrypoints: websecure
+      traefik.http.routers.budgetflow-grafana-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.budgetflow-grafana-secure.middlewares: budgetflow-hsts
+      traefik.http.routers.budgetflow-grafana-secure.service: budgetflow-grafana
+      traefik.http.middlewares.budgetflow-hsts.headers.stsSeconds: "31536000"
+      traefik.http.services.budgetflow-grafana.loadbalancer.server.port: "3000"
+
 configs:
+  prometheus:
+    file: ./observability/prometheus.yml
+  loki:
+    file: ./observability/loki.yml
+  alloy:
+    file: ./observability/config.alloy
+  grafana-datasources:
+    file: ./observability/grafana/provisioning/datasources.yml
+  grafana-dashboards:
+    file: ./observability/grafana/provisioning/dashboards.yml
+  grafana-dashboard-overview:
+    file: ./observability/grafana/dashboards/budgetflow-overview.json
   # Database per service, one role each with its own password. Runs only on the first start (empty volume).
   postgres-init:
     content: |
@@ -321,6 +437,9 @@ networks:
     external: true
 
 volumes:
+  grafana-data:
+  loki-data:
+  prometheus-data:
   postgres-data:
   postgres-backups:
   rabbitmq-data:

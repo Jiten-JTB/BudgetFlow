@@ -6,6 +6,7 @@ import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -29,7 +31,7 @@ class GatewayConfig {
      * unauthenticated traffic never reaches them.
      */
     @Bean
-    SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, Environment environment) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)              // bearer tokens only, no cookies
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
@@ -39,9 +41,32 @@ class GatewayConfig {
                         .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
                         .pathMatchers("/actuator/health/**", "/actuator/health").permitAll()
+                        .matchers(actuatorOnManagementPort(environment)).permitAll()
                         .anyExchange().hasAuthority(API_SCOPE))
                 .oauth2ResourceServer(rs -> rs.jwt(Customizer.withDefaults()))
                 .build();
+    }
+
+    /**
+     * Actuator paths are open only on the separate management port (never routed publicly; Prometheus scrapes it).
+     * Uses the connection's local port, never a header, and matches nothing when management shares the public port.
+     */
+    static ServerWebExchangeMatcher actuatorOnManagementPort(Environment environment) {
+        return exchange -> {
+            int managementPort = managementPort(environment);
+            InetSocketAddress local = exchange.getRequest().getLocalAddress();
+            boolean matches = managementPort > 0 && local != null && local.getPort() == managementPort
+                    && exchange.getRequest().getPath().value().startsWith("/actuator/");
+            return matches ? ServerWebExchangeMatcher.MatchResult.match() : ServerWebExchangeMatcher.MatchResult.notMatch();
+        };
+    }
+
+    private static int managementPort(Environment environment) {
+        int port = environment.getProperty("local.management.port", Integer.class,
+                environment.getProperty("management.server.port", Integer.class, -1));
+        int serverPort = environment.getProperty("local.server.port", Integer.class,
+                environment.getProperty("server.port", Integer.class, 8080));
+        return port > 0 && port != serverPort ? port : -1;
     }
 
     @Bean

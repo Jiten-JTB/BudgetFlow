@@ -10,6 +10,7 @@ Images are built and tested in GitHub Actions ([release.yml](../../.github/workf
 | `budgetflow.jitenjtb.com` | web | 3000 |
 | `budgetflow-api.jitenjtb.com` | api-gateway | 8080 |
 | `budgetflow-auth.jitenjtb.com` | identity-service (path allow-list) | 9000 |
+| `budgetflow-grafana.jitenjtb.com` | grafana (login required) | 3000 |
 
 Routing is set by Traefik labels in the compose file, not by Dokploy's **Domains** tab. Adding the domains there too would create duplicate routers.
 
@@ -102,6 +103,28 @@ Before restoring, stop the service that owns that database, then start it again 
 - **Logs**: Dokploy → service → Logs. Docker rotates them at 3 × 10 MB per container.
 - **Health**: `docker ps` shows the healthcheck state. Actuator listens on the management ports, which are internal only.
 - **Postgres and RabbitMQ access**: `docker exec` into the container over SSH. Nothing is published on the host.
+
+## 9. Monitoring (Grafana)
+
+`https://budgetflow-grafana.jitenjtb.com`: sign in as `admin` with `GRAFANA_ADMIN_PASSWORD`. Sign-up and anonymous access are off. The **Budget Flow → Budget Flow overview** dashboard shows:
+- **Health and traffic:** services up, request rate, 4xx and 5xx rates, p95 latency.
+- **Sagas and messaging:** failed sagas, dead-letter queues, queue depth.
+- **Resources:** heap, CPU, DB connections, GC pause time.
+- **Logs:** error logs and all logs.
+
+How it works:
+- **Metrics:** Prometheus scrapes each service's management port over the private network, and RabbitMQ per queue. It keeps 15 days of data, capped at 2 GB.
+  - Actuator answers anonymously only on the management port, checked by the connection's local port. The public ports still return 401.
+- **Logs:** Alloy reads container logs through the Docker socket (read-only), keeping only this compose project's containers, and ships them to Loki, which keeps 14 days.
+  - JVM services log ECS JSON, so `level` is a label. For example: `{service="orchestrator-service", level="ERROR"}`.
+- **Dashboards and data sources** are provisioned from `observability/` and read-only in the UI. To change one, edit the JSON and redeploy.
+
+Adding it to an existing deployment:
+1. Add `GRAFANA_ADMIN_PASSWORD=<openssl rand -hex 32>` to Dokploy's Environment.
+2. Release a tag that includes the management-port change (v0.1.1 or later) and set `IMAGE_TAG` to it.
+3. Deploy.
+
+Not set up yet: alert notifications (they need a contact point such as email or Telegram) and traces (Tempo/OTel).
 
 ## Local verification
 
