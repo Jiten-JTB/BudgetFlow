@@ -1,6 +1,9 @@
 import type { Transaction } from "@budgetflow/api-client";
 import { buildOverview } from "@/features/overview/build-overview";
 import { OverviewView } from "@/features/overview/overview-view";
+import { buildSetupSteps } from "@/features/overview/setup-steps";
+import { isSetupHidden } from "@/server/setup-visibility";
+import { hideSetup } from "./setup-actions";
 import { requestLocale } from "@/lib/locale";
 import { currentMonth, monthLabel, monthRange, parseMonth } from "@/lib/month";
 import { serverApi } from "@/server/api";
@@ -26,6 +29,14 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
   ]);
 
   const overview = buildOverview({ baseCurrency: me.baseCurrency, transactions, categories, incomeSources, accounts, budgets });
+  const setup = month === thisMonth && !(await isSetupHidden())
+    ? buildSetupSteps({
+        accounts,
+        incomeSourceCount: incomeSources.filter((s) => !s.archived).length,
+        budgetCount: budgets.length,
+        hasTransactions: transactions.length > 0 || (await api.transactions.list({ limit: 1 })).items.length > 0,
+      })
+    : null;
   return (
     <OverviewView
       overview={overview}
@@ -35,6 +46,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
       isCurrentMonth={month >= thisMonth}
       accountNames={Object.fromEntries(accounts.map((a) => [a.id, a.name]))}
       categoryNames={Object.fromEntries(categories.map((c) => [c.id, c.name]))}
+      setup={setup && !setup.complete ? { steps: setup.steps, hideAction: hideSetup } : null}
     />
   );
 }

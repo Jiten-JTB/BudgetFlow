@@ -101,4 +101,15 @@ describe("OverviewView", () => {
     expect(screen.getByText("₹1,900.00 over")).toBeInTheDocument();
     expect(screen.getByRole("progressbar", { name: "Shopping" })).toHaveAttribute("aria-valuenow", "131");
   });
+
+  it("shows the setup steps above the spread only when given", () => {
+    const steps = [{ id: "accounts" as const, title: "Add the accounts you use", detail: "d", href: "/accounts/new", optional: false, done: false }];
+    const { unmount } = render(<OverviewView overview={base} month="2026-11" monthTitle="November 2026" locale="en-IN"
+      accountNames={{}} categoryNames={{}} isCurrentMonth setup={{ steps, hideAction: () => {} }} />);
+    const setup = screen.getByRole("region", { name: "Set up your books" });
+    expect(setup.compareDocumentPosition(screen.getByRole("region", { name: "Money in" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    unmount();
+    view();
+    expect(screen.queryByRole("region", { name: "Set up your books" })).toBeNull();
+  });
 });

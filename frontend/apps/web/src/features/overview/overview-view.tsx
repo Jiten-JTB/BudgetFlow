@@ -5,6 +5,8 @@ import { BudgetRow } from "@/components/budget-row";
 import { TransactionRow } from "@/components/transaction-row";
 import { shiftMonth } from "@/lib/month";
 import type { LedgerPage, Overview } from "./build-overview";
+import { SetupChecklist } from "./setup-checklist";
+import type { SetupStep } from "./setup-steps";
 
 type Props = {
   overview: Overview;
@@ -14,9 +16,11 @@ type Props = {
   accountNames: Record<string, string>;
   categoryNames: Record<string, string>;
   isCurrentMonth: boolean;
+  /** First-run steps, shown until they are all done or hidden. */
+  setup?: { steps: SetupStep[]; hideAction: (formData: FormData) => void | Promise<void> } | null;
 };
 
-export function OverviewView({ overview: o, month, monthTitle, locale, accountNames, categoryNames, isCurrentMonth }: Props) {
+export function OverviewView({ overview: o, month, monthTitle, locale, accountNames, categoryNames, isCurrentMonth, setup }: Props) {
   const accountCount = o.accounts.items.length;
   const [primaryTotal, ...otherTotals] = o.accounts.totals;
   return (
@@ -44,6 +48,8 @@ export function OverviewView({ overview: o, month, monthTitle, locale, accountNa
           </p>
         )}
       </header>
+
+      {setup && <SetupChecklist steps={setup.steps} hideAction={setup.hideAction} />}
 
       <div className="flex flex-col gap-3">
         <div className="grid overflow-hidden rounded-sheet bg-panel shadow-sheet md:grid-cols-[1fr_13rem_1fr]">

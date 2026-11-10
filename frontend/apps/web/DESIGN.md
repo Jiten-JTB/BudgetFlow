@@ -227,6 +227,20 @@ The overview's spread: "Money in" by income source on the left, "Money out" by t
 ### Budget Line
 Name, "spent of limit" in tabular figures, an 8px bar (indigo on track, turmeric at the warning point, vermilion over the limit), and the state in words ("₹7,120.00 left", "₹1,900.00 over"); exposed as a progressbar with a value text.
 
+### Setup checklist
+- **What it is:** a first-run sheet on the overview titled "Set up your books", between the header and the spread. It only appears on the current month.
+- **Steps:** an ordered list of four:
+  1. Accounts.
+  2. Income sources (optional).
+  3. A budget (optional).
+  4. A first transaction.
+- **Ticking off:** each step completes itself from the user's real data. Open steps are indigo links with a one-line reason and "Optional" in words. Finished steps show a lucide check and "Done", never a strike-through, because strike-through means cancelled.
+- **Progress:** stated in words ("1 of 4 done"), with no bar.
+- **Hiding:** the sheet disappears when every step is done, or through "Hide these steps", which is stored per user in a cookie.
+- **Never gamified.**
+
+Empty choices point to where they are filled: the Income source field says "None yet. Add an income source", and a transfer with a single account explains that it needs two.
+
 ### Status note
 Pending transactions show "Confirming" with a small pulsing turmeric dot (still under reduced motion: the animation stops); cancelled ones are struck through with "Cancelled: <reason>" in vermilion.
 

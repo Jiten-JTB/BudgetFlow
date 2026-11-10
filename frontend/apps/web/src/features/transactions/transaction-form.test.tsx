@@ -18,14 +18,15 @@ const incomeSources = [{ id: "acme", name: "Acme Corp", defaultAccountId: "hdfc"
 const txn = (status: Transaction["status"], extra: Partial<Transaction> = {}) =>
   ({ id: "t1", status, kind: "EXPENSE", amount: "1860.0000", currency: "INR", failureReason: null, ...extra }) as Transaction;
 
-function setup(api: Partial<FormApi> = {}, initialKind: "EXPENSE" | "INCOME" | "TRANSFER" = "EXPENSE") {
+function setup(api: Partial<FormApi> = {}, initialKind: "EXPENSE" | "INCOME" | "TRANSFER" = "EXPENSE",
+               data: { accounts?: typeof accounts; incomeSources?: typeof incomeSources } = {}) {
   const full: FormApi = {
     record: vi.fn(async () => ({ transaction: txn("PENDING"), replayed: false })),
     get: vi.fn(async () => txn("COMPLETED")),
     ...api,
   };
   let n = 0;
-  render(<TransactionForm accounts={accounts} categories={categories} incomeSources={incomeSources} today="2026-11-06"
+  render(<TransactionForm accounts={data.accounts ?? accounts} categories={categories} incomeSources={data.incomeSources ?? incomeSources} today="2026-11-06"
     initialKind={initialKind} api={full} newKey={() => `key-${++n}-0000`} pollIntervalMs={1} />);
   return { api: full, user: userEvent.setup() };
 }
@@ -124,5 +125,21 @@ describe("TransactionForm", () => {
     await user.click(screen.getByRole("button", { name: "Save expense" }));
 
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Category is archived"));
+  });
+
+  it("points to where income sources are added when there are none yet", () => {
+    setup({}, "INCOME", { incomeSources: [] });
+    expect(screen.getByRole("link", { name: "Add an income source" })).toHaveAttribute("href", "/income-sources");
+  });
+
+  it("does not show that hint once income sources exist", () => {
+    setup({}, "INCOME");
+    expect(screen.queryByRole("link", { name: "Add an income source" })).toBeNull();
+  });
+
+  it("explains that a transfer needs a second account", () => {
+    setup({}, "TRANSFER", { accounts: [{ id: "cash", name: "Cash", currency: "INR" }] });
+    expect(screen.getByText(/Transfers move money between two of your accounts/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open another account" })).toHaveAttribute("href", "/accounts/new");
   });
 });

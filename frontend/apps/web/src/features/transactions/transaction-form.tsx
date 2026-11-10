@@ -178,10 +178,18 @@ export function TransactionForm({ accounts, categories, incomeSources, today, in
             {form.kind === "TRANSFER" ? (
               <Field id={`${id}-counterAccountId`} label="To account" error={errors.counterAccountId}>
                 {(props) => (
-                  <select {...props} value={form.counterAccountId} onChange={(e) => set("counterAccountId", e.target.value)} className={inputClass}>
-                    <option value="">Choose…</option>
-                    {accounts.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.currency})</option>)}
-                  </select>
+                  <>
+                    <select {...props} value={form.counterAccountId} onChange={(e) => set("counterAccountId", e.target.value)} className={inputClass}>
+                      <option value="">Choose…</option>
+                      {accounts.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.currency})</option>)}
+                    </select>
+                    {accounts.length < 2 && (
+                      <p className="text-sm text-mute">
+                        Transfers move money between two of your accounts.{" "}
+                        <Link href="/accounts/new" className="text-indigo underline">Open another account</Link>
+                      </p>
+                    )}
+                  </>
                 )}
               </Field>
             ) : (
@@ -199,12 +207,17 @@ export function TransactionForm({ accounts, categories, incomeSources, today, in
 
             {form.kind === "INCOME" && (
               <Field id={`${id}-incomeSourceId`} label="Income source" error={errors.incomeSourceId}>
-                {(props) => (
+                {(props) => (<>
                   <select {...props} value={form.incomeSourceId} onChange={(e) => chooseSource(e.target.value)} className={inputClass}>
                     <option value="">Not from a named source</option>
                     {incomeSources.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
-                )}
+                  {incomeSources.length === 0 && (
+                    <p className="text-sm text-mute">
+                      None yet. <Link href="/income-sources" className="text-indigo underline">Add an income source</Link>
+                    </p>
+                  )}
+                </>)}
               </Field>
             )}
 

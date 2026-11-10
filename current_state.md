@@ -106,6 +106,16 @@ _Last updated: 2026-11-10 (deployed + Grafana)_
 - `navigatorLocale` moved to `src/lib/navigator-locale.ts`. The edit-budget form groups the saved limit after mount to avoid a hydration mismatch.
 - Tests: money 31, web 88; E2E 8/8 (money flow types `110000` digit by digit and expects `1,10,000`). Ships with the next release tag.
 
+## First-run guidance (2026-11-10)
+- The overview shows a "Set up your books" checklist (`features/overview/setup-steps.ts`, `setup-checklist.tsx`), only for the current month. Steps:
+  1. Accounts: done when there is a second account or any balance is not zero, because every user starts with an empty Cash account.
+  2. Income sources (optional).
+  3. Budget (optional).
+  4. First transaction: checked with one extra `transactions.list({limit:1})` call when this month is empty.
+- The checklist hides when complete, or through "Hide these steps" (server action `app/(app)/setup-actions.ts`). The `bf_setup_hidden` cookie holds the user id, so hiding is per user.
+- Transaction form: an empty Income source field shows "None yet. Add an income source", and a transfer with one account explains it needs two.
+- Tests: web 102 unit; E2E 9/9 (new `e2e/onboarding.spec.ts`; axe passes on the overview with the checklist showing). Detector clean. DESIGN.md updated. Ships as v0.1.3.
+
 ## Commands
 - Build + all tests: `cd backend && ./mvnw verify`
 - Local infra: `docker compose -f infra/docker-compose.yml up -d`
