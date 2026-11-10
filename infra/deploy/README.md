@@ -3,7 +3,7 @@
 The whole stack is one Dokploy **Compose** service built from [docker-compose.prod.yml](docker-compose.prod.yml).
 Images are built and tested in GitHub Actions ([release.yml](../../.github/workflows/release.yml)) and pulled from GHCR, so the shared VPS never compiles anything.
 
-> The Dokploy panel (`dokploy.conceptkart.cloud`) is shared. Every panel step below is done by the owner, not by automation. Nothing here changes Dokploy itself, its Traefik, or other projects.
+> Target: Dokploy panel `admin.conceptkart.co.in` (VPS 89.116.21.116). Treat it as shared. Every panel step below is done by the owner, not by automation. Nothing here changes Dokploy itself, its Traefik, or other projects.
 
 | Domain | Container | Port |
 |---|---|---|

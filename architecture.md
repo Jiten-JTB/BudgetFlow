@@ -171,7 +171,7 @@ Coverage gate: 80% line on domain/application.
 | `budgetflow.jitenjtb.com` | Next.js web app | Yes |
 | `budgetflow-api.jitenjtb.com` | API gateway (web + mobile clients) | Yes |
 | `budgetflow-auth.jitenjtb.com` | identity-service OAuth2/OIDC issuer (login pages, tokens) | Yes |
-| `dokploy.conceptkart.cloud` | Dokploy panel (**shared, not fully owned: ask first, nothing critical or experimental**) | Admin only |
+| `admin.conceptkart.co.in` | Dokploy panel, VPS 89.116.21.116 (**ask first, nothing critical or experimental**) | Admin only |
 | `budgetflow-grafana.jitenjtb.com` | Monitoring dashboards (proposed, not confirmed) | Admin only |
 
 DNS: A records to the VPS. TLS via Traefik + Let's Encrypt. RabbitMQ/Postgres/Redis admin stay internal (SSH tunnel).
