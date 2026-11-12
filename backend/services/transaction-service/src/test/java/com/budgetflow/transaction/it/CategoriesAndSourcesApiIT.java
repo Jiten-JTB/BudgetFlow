@@ -90,4 +90,11 @@ class CategoriesAndSourcesApiIT extends TransactionIntegrationTest {
         mvc.perform(get("/api/v1/income-sources").param("includeArchived", "true").with(user(alice)))
                 .andExpect(jsonPath("$", hasSize(1)));
     }
+
+    @Test
+    void acceptsPocketMoneyAsASourceType() throws Exception {
+        postJson(alice, "/api/v1/income-sources", "{\"name\":\"Mom\",\"type\":\"POCKET_MONEY\"}")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.type").value("POCKET_MONEY"));
+    }
 }

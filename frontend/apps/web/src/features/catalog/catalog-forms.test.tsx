@@ -2,7 +2,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { schemas } from "@budgetflow/api-client";
 import { CategoryForm, IncomeSourceForm } from "./catalog-forms";
+import { SOURCE_TYPES } from "./source-types";
 
 describe("IncomeSourceForm", () => {
   it("adds a named source with its usual account", async () => {
@@ -21,6 +23,13 @@ describe("IncomeSourceForm", () => {
 
     await waitFor(() => expect(onDone).toHaveBeenCalled());
     expect(create).toHaveBeenCalledWith({ name: "Lumen Studio", type: "FREELANCE", defaultAccountId: "hdfc" });
+  });
+});
+
+describe("source types", () => {
+  it("offers Pocket money", () => {
+    expect(SOURCE_TYPES).toContainEqual(["POCKET_MONEY", "Pocket money"]);
+    expect(schemas.IncomeSourceType.options).toContain("POCKET_MONEY");
   });
 });
 

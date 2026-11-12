@@ -168,3 +168,7 @@ _Last updated: 2026-11-10 (deployed + Grafana)_
 - Every service `db/schema.sql` must include the tables from `common-messaging/.../schema-fragment.sql`.
 - impeccable's launcher downloads a native binary from its GitHub releases on first use (checksum-verified); approved by user (2026-11-04): allowed to download on first use; edit hook NOT installed.
 - `.github/workflows/backend.yml` has not run yet (needs a push).
+
+## Pocket money source type (2026-11-12, for v0.1.6)
+- Income source type `POCKET_MONEY` ("Pocket money"): enum, schema.sql CHECK, transaction `V2__pocket_money_source_type.sql`, api-client zod enum, web SOURCE_TYPES.
+- v0.1.5 is live (sender app@jitenjtb.com).

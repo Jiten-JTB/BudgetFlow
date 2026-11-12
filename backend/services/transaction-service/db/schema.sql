@@ -46,7 +46,7 @@ CREATE TABLE income_source (
     updated_at         TIMESTAMPTZ  NOT NULL,
     version            BIGINT       NOT NULL DEFAULT 0,
     CONSTRAINT ck_income_source_type CHECK (type IN (
-        'SALARY', 'BUSINESS', 'FREELANCE', 'INVESTMENT', 'RENTAL', 'PENSION', 'GIFT', 'OTHER'))
+        'SALARY', 'BUSINESS', 'FREELANCE', 'INVESTMENT', 'RENTAL', 'PENSION', 'GIFT', 'POCKET_MONEY', 'OTHER'))
 );
 
 CREATE INDEX ix_income_source_user ON income_source (user_id);
