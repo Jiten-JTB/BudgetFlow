@@ -25,11 +25,12 @@ check "every service database has its own password" '[ "$db_pw_count" = 5 ]'
 key_line=$(grep '^IDENTITY_SIGNING_KEY_PEM=' "$env_file" | cut -d= -f2-)
 check "signing key is a single-line PKCS#8 RSA key" \
   'printf "%s\n" "-----BEGIN PRIVATE KEY-----" "$key_line" "-----END PRIVATE KEY-----" | fold -w 64 | openssl pkey -noout 2>/dev/null'
+check "leaves a slot for the mailbox password (it can't be generated)" "grep -q '^SMTP_PASSWORD=$' '$env_file'"
 check "signing key id is dated" "grep -Eq '^IDENTITY_SIGNING_KEY_ID=budgetflow-[0-9]{4}-[0-9]{2}$' '$env_file'"
 
 echo "docker-compose.prod.yml"
 cfg="$work/config.json"
-IMAGE_TAG=test docker compose -f "$here/docker-compose.prod.yml" --env-file "$env_file" config --format json >"$cfg"
+IMAGE_TAG=test SMTP_PASSWORD=test-mailbox-password docker compose -f "$here/docker-compose.prod.yml" --env-file "$env_file" config --format json >"$cfg"
 q() { jq -r "$1" "$cfg"; }
 
 services=$(q '.services | keys[]' | sort | tr '\n' ' ')
@@ -52,7 +53,7 @@ check "web is routed at budgetflow.jitenjtb.com:3000" \
 check "gateway is routed at budgetflow-api.jitenjtb.com:8080" \
   'labels api-gateway | grep -q "rule=Host(\`budgetflow-api.jitenjtb.com\`)" && labels api-gateway | grep -q "loadbalancer.server.port=8080"'
 auth_rule=$(labels identity-service | grep 'routers.budgetflow-auth.rule=' | cut -d= -f2-)
-for p in "PathPrefix(\`/oauth2/\`)" "PathPrefix(\`/.well-known/\`)" "PathPrefix(\`/connect/\`)" "Path(\`/userinfo\`)" "Path(\`/login\`)" \
+for p in "Path(\`/\`)" "PathPrefix(\`/oauth2/\`)" "PathPrefix(\`/.well-known/\`)" "PathPrefix(\`/connect/\`)" "Path(\`/userinfo\`)" "Path(\`/login\`)" \
          "Path(\`/logout\`)" "Path(\`/error\`)" "PathPrefix(\`/css/\`)" "PathPrefix(\`/fonts/\`)"; do
   check "auth domain allows $p" '[[ "$auth_rule" == *"$p"* ]]'
 done
@@ -78,6 +79,17 @@ check "web and identity share the client secret" \
 check "gateway CORS allows only the web origin" '[ "$(q ".services[\"api-gateway\"].environment.GATEWAY_CORS_ALLOWED_ORIGINS")" = https://budgetflow.jitenjtb.com ]'
 check "postgres, rabbitmq and redis data are on named volumes" \
   '[ "$(q "[.volumes | keys[]] | sort | join(\",\")")" = "grafana-data,loki-data,postgres-backups,postgres-data,prometheus-data,rabbitmq-data,redis-data" ]'
+echo "email"
+idv() { q ".services[\"identity-service\"].environment.$1 // empty"; }
+check "identity sends mail through Hostinger over SSL" \
+  '[ "$(idv SPRING_MAIL_HOST)" = smtp.hostinger.com ] && [ "$(idv SPRING_MAIL_PORT)" = 465 ] && [ "$(idv SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE)" = true ]'
+check "identity signs in to the mailbox as jiten@jitenjtb.com" '[ "$(idv SPRING_MAIL_USERNAME)" = jiten@jitenjtb.com ] && [ "$(idv SPRING_MAIL_PASSWORD)" = test-mailbox-password ]'
+check "emails come from the same address" '[[ "$(idv IDENTITY_MAIL_FROM)" == *"<jiten@jitenjtb.com>" ]]'
+check "verification links open the web app" '[ "$(idv IDENTITY_WEB_VERIFY_EMAIL_URL)" = https://budgetflow.jitenjtb.com/verify-email ]'
+check "email verification is required" '[ "$(idv IDENTITY_EMAIL_VERIFICATION_REQUIRED)" = true ]'
+check "compose refuses to start without the mailbox password" \
+  '! IMAGE_TAG=test docker compose -f "$here/docker-compose.prod.yml" --env-file "$env_file" config >/dev/null 2>&1'
+
 echo "observability"
 check "grafana is routed at budgetflow-grafana.jitenjtb.com:3000" \
   'labels grafana | grep -q "rule=Host(\`budgetflow-grafana.jitenjtb.com\`)" && labels grafana | grep -q "loadbalancer.server.port=3000"'

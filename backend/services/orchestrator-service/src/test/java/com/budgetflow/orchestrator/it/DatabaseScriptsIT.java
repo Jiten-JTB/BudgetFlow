@@ -11,4 +11,10 @@ class DatabaseScriptsIT {
         DatabaseScripts.assertRebuildable(List.of(
                 "saga_instance", "saga_event", "outbox_message", "inbox_message"));
     }
+
+    @Test
+    void migrationsBuildExactlyTheSchemaInSchemaSql() throws Exception {
+        com.budgetflow.common.test.DatabaseScripts.assertMigrationsMatchSchema();
+    }
+
 }

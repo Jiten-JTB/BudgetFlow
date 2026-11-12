@@ -40,6 +40,9 @@ IDENTITY_SIGNING_KEY_PEM=${signing_key}
 
 GRAFANA_ADMIN_PASSWORD=$(secret)
 
+# Password of the jiten@jitenjtb.com mailbox (Hostinger email); verification emails are sent from it.
+SMTP_PASSWORD=
+
 # Days of daily database dumps kept on the VPS
 BACKUP_RETENTION_DAYS=14
 EOF

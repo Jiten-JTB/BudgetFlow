@@ -52,6 +52,7 @@ class OAuth2FlowIT extends IdentityIntegrationTest {
         email = uniqueEmail();
         userId = JsonPath.read(mvc.perform(post("/api/v1/users").contentType(MediaType.APPLICATION_JSON)
                 .content(REGISTER_JSON.formatted(email))).andReturn().getResponse().getContentAsString(), "$.id");
+        markEmailVerified(jdbc, email);
         session = new MockHttpSession();
     }
 

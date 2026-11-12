@@ -7,7 +7,7 @@ test("a new user is guided through setup, which ticks itself off and can be hidd
   const setup = page.getByRole("region", { name: "Set up your books" });
   await expect(setup).toContainText("0 of 4 done");
 
-  await setup.getByRole("link", { name: "Add the accounts you use" }).click();
+  await setup.getByRole("link", { name: "Open an account" }).click();
   await page.getByLabel("Name").fill("HDFC Savings");
   await page.getByLabel("Current balance").fill("25000");
   await page.getByRole("button", { name: "Open account" }).click();

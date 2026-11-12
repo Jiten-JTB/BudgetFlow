@@ -1,5 +1,10 @@
 package com.budgetflow.budget.config;
 
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import java.util.List;
+import com.budgetflow.common.messaging.inbox.IdempotentConsumer;
+import com.budgetflow.common.messaging.erasure.UserDataEraser;
 import com.budgetflow.budget.adapter.in.messaging.SagaCommandListener;
 import com.budgetflow.budget.adapter.out.messaging.OutboxBudgetEventPublisher;
 import com.budgetflow.budget.adapter.out.persistence.JdbcBudgetRepository;
@@ -22,6 +27,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 
 @Configuration(proxyBeanMethods = false)
 class ApplicationConfig {
+
+    static final String USER_DELETED_QUEUE = "budget-service.user-deleted";
 
     @Bean
     Clock clock() {
@@ -59,4 +66,25 @@ class ApplicationConfig {
         return new ConsumptionService(budgets, usages, new JdbcConsumptionRepository(jdbc), new JdbcOperationLog(jdbc),
                 new OutboxBudgetEventPublisher(outbox), budgetService, clock);
     }
+
+    /** identity.UserDeleted: erase every row this service keeps for the user (children before parents). */
+    @Bean
+    Declarables userDeletedTopology() {
+        return UserDataEraser.topology(USER_DELETED_QUEUE);
+    }
+
+    @Bean
+    SimpleMessageListenerContainer userDeletedListener(UserDataEraser eraser, SimpleRabbitListenerContainerFactory factory) {
+        return eraser.container(factory);
+    }
+
+    @Bean
+    UserDataEraser userDataEraser(IdempotentConsumer inbox, JdbcClient jdbc) {
+        return new UserDataEraser(USER_DELETED_QUEUE, "budget.user-deleted", inbox, jdbc, List.of(
+                "DELETE FROM budget_consumption WHERE user_id = :userId",
+                "DELETE FROM budget_operation WHERE user_id = :userId",
+                "DELETE FROM budget_period_usage WHERE budget_id IN (SELECT id FROM budget WHERE user_id = :userId)",
+                "DELETE FROM budget WHERE user_id = :userId"));
+    }
+
 }

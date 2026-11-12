@@ -225,8 +225,10 @@
 
     <profiles>
         <!--
-          Services with a database keep db/schema.sql as the single source of truth.
-          Pre-production it is packaged as Flyway's baseline migration V1 so it is never edited twice.
+          Services with a database keep db/schema.sql as the single source of truth (full current schema) and
+          db/migrations/V*.sql as what Flyway runs. V1__baseline.sql is frozen at the first production release;
+          every later change is a new V2+ migration plus the same change in schema.sql. DatabaseScriptsIT proves
+          that the migrations build exactly the schema in schema.sql.
         -->
         <profile>
             <id>flyway-baseline-from-schema</id>
@@ -242,15 +244,16 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>copy-schema-as-flyway-baseline</id>
+                                <id>copy-flyway-migrations</id>
                                 <phase>process-resources</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <copy file="${project.basedir}/db/schema.sql"
-                                              tofile="${project.build.outputDirectory}/db/migration/V1__baseline.sql"/>
+                                        <copy todir="${project.build.outputDirectory}/db/migration">
+                                            <fileset dir="${project.basedir}/db/migrations" includes="V*.sql"/>
+                                        </copy>
                                     </target>
                                 </configuration>
                             </execution>

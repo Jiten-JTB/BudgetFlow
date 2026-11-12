@@ -39,7 +39,8 @@ class GatewayConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeExchange(auth -> auth
                         .pathMatchers(HttpMethod.OPTIONS).permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/users", "/api/v1/users/email-verifications",
+                                "/api/v1/users/email-verifications/resend").permitAll()
                         .pathMatchers("/actuator/health/**", "/actuator/health").permitAll()
                         .matchers(actuatorOnManagementPort(environment)).permitAll()
                         .anyExchange().hasAuthority(API_SCOPE))

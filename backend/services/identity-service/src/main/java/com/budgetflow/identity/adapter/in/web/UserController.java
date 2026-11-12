@@ -1,6 +1,8 @@
 package com.budgetflow.identity.adapter.in.web;
 
 import com.budgetflow.common.security.CurrentUserId;
+import com.budgetflow.identity.application.DeleteAccountService;
+import com.budgetflow.identity.application.EmailVerificationService;
 import com.budgetflow.identity.application.ProfileService;
 import com.budgetflow.identity.application.RegisterUserCommand;
 import com.budgetflow.identity.application.RegisterUserService;
@@ -13,6 +15,7 @@ import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,10 +30,15 @@ class UserController {
 
     private final RegisterUserService registerUser;
     private final ProfileService profiles;
+    private final EmailVerificationService verification;
+    private final DeleteAccountService deleteAccount;
 
-    UserController(RegisterUserService registerUser, ProfileService profiles) {
+    UserController(RegisterUserService registerUser, ProfileService profiles, EmailVerificationService verification,
+                   DeleteAccountService deleteAccount) {
         this.registerUser = registerUser;
         this.profiles = profiles;
+        this.verification = verification;
+        this.deleteAccount = deleteAccount;
     }
 
     /** Public; rate limited at the gateway. */
@@ -53,6 +61,43 @@ class UserController {
         return UserResponse.of(profiles.update(userId, new UpdateProfileCommand(
                 request.displayName(), request.baseCurrency(), request.timezone()), ClientInfos.from(http)));
     }
+
+    /** Permanently erases the signed-in user after they confirm with their password. */
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteMe(@CurrentUserId UUID userId, @Valid @RequestBody DeleteAccountRequest request, HttpServletRequest http) {
+        deleteAccount.delete(userId, request.password(), ClientInfos.from(http));
+    }
+
+    /** Public: the link from the verification email. Rate limited per IP at the gateway. */
+    @PostMapping("/email-verifications")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void confirmEmail(@Valid @RequestBody ConfirmEmailRequest request) {
+        verification.confirm(request.token());
+    }
+
+    /** Public and deliberately silent: always 202, whether or not the address has an account. */
+    @PostMapping("/email-verifications/resend")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    void resendVerification(@Valid @RequestBody ResendVerificationRequest request) {
+        verification.resend(request.email());
+    }
+
+    record DeleteAccountRequest(@NotBlank @Size(max = 1024) String password) {
+        @Override
+        public String toString() {
+            return "DeleteAccountRequest[password=****]";
+        }
+    }
+
+    record ConfirmEmailRequest(@NotBlank @Size(max = 200) String token) {
+        @Override
+        public String toString() {
+            return "ConfirmEmailRequest[token=****]";
+        }
+    }
+
+    record ResendVerificationRequest(@NotBlank @Size(max = 320) String email) {}
 
     // Size caps are coarse input guards; the domain enforces the real rules.
     record RegisterUserRequest(

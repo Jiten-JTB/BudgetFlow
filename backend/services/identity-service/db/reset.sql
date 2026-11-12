@@ -3,6 +3,8 @@
 -- DESTRUCTIVE. Pre-production / local use only. Rebuild with db/schema.sql.
 -- =============================================================================
 
+DROP TABLE IF EXISTS email_outbox                 CASCADE;
+DROP TABLE IF EXISTS email_verification_token     CASCADE;
 DROP TABLE IF EXISTS inbox_message                CASCADE;
 DROP TABLE IF EXISTS outbox_message               CASCADE;
 DROP TABLE IF EXISTS oauth2_authorization_consent CASCADE;

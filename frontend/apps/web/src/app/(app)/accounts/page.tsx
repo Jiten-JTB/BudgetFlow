@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Money } from "@/components/money";
 import { ACCOUNT_TYPES } from "@/features/accounts/account-types";
 import { requestLocale } from "@/lib/locale";
+import { ActionLink, EmptyState } from "@/components/action-link";
 import { serverApi } from "@/server/api";
 
 export const metadata = { title: "Accounts" };
@@ -33,7 +34,7 @@ export default async function AccountsPage() {
           </p>
         </div>
         {active.length === 0 ? (
-          <p className="text-mute">No active accounts. <Link href="/accounts/new" className="text-indigo underline">Open one</Link> to start recording.</p>
+          <EmptyState text="No active accounts." action="Open an account" href="/accounts/new" />
         ) : <AccountList accounts={active} locale={locale} />}
       </section>
 

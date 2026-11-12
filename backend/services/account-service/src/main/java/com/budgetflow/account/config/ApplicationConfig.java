@@ -1,5 +1,9 @@
 package com.budgetflow.account.config;
 
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import java.util.List;
+import com.budgetflow.common.messaging.erasure.UserDataEraser;
 import com.budgetflow.account.adapter.in.messaging.SagaCommandListener;
 import com.budgetflow.account.adapter.in.messaging.UserRegisteredListener;
 import com.budgetflow.account.adapter.out.messaging.OutboxAccountEventPublisher;
@@ -25,6 +29,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 @Configuration(proxyBeanMethods = false)
 class ApplicationConfig {
+
+    static final String USER_DELETED_QUEUE = "account-service.user-deleted";
 
     @Bean
     Clock clock() {
@@ -77,4 +83,24 @@ class ApplicationConfig {
     UserRegisteredListener userRegisteredListener(IdempotentConsumer inbox, AccountService accounts, JsonMapper json) {
         return new UserRegisteredListener(inbox, accounts, json);
     }
+
+    /** identity.UserDeleted: erase every row this service keeps for the user (children before parents). */
+    @Bean
+    Declarables userDeletedTopology() {
+        return UserDataEraser.topology(USER_DELETED_QUEUE);
+    }
+
+    @Bean
+    SimpleMessageListenerContainer userDeletedListener(UserDataEraser eraser, SimpleRabbitListenerContainerFactory factory) {
+        return eraser.container(factory);
+    }
+
+    @Bean
+    UserDataEraser userDataEraser(IdempotentConsumer inbox, JdbcClient jdbc) {
+        return new UserDataEraser(USER_DELETED_QUEUE, "account.user-deleted", inbox, jdbc, List.of(
+                "DELETE FROM balance_entry WHERE user_id = :userId",
+                "DELETE FROM operation_tombstone WHERE user_id = :userId",
+                "DELETE FROM account WHERE user_id = :userId"));
+    }
+
 }

@@ -30,5 +30,7 @@ test("signing out ends the session @mobile", async ({ page }) => {
   await page.getByRole("button", { name: "Sign out" }).last().click();
   await expect(page.getByRole("heading", { name: "You’re signed out" })).toBeVisible();
   await goto(page, "/");
-  await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Budget Flow"); // signed out: the landing page
+  await goto(page, "/transactions");
+  await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible(); // the app itself needs signing in
 });

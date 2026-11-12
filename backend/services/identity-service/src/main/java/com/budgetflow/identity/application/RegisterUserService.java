@@ -23,14 +23,20 @@ public class RegisterUserService {
     private final PasswordHasher hasher;
     private final UserEventPublisher events;
     private final AuditLog audit;
+    private final EmailVerificationService verification;
+    private final boolean verificationRequired;
     private final Clock clock;
 
+    /** @param verificationRequired false only where no mail is configured: users then start verified */
     public RegisterUserService(UserRepository users, PasswordHasher hasher, UserEventPublisher events,
-                               AuditLog audit, Clock clock) {
+                               AuditLog audit, EmailVerificationService verification, boolean verificationRequired,
+                               Clock clock) {
         this.users = users;
         this.hasher = hasher;
         this.events = events;
         this.audit = audit;
+        this.verification = verification;
+        this.verificationRequired = verificationRequired;
         this.clock = clock;
     }
 
@@ -49,9 +55,15 @@ public class RegisterUserService {
         Instant now = clock.instant();
         User user = User.register(UuidV7.generate(), email, hasher.hash(command.password()), displayName,
                 currency, timezone, now);
+        if (!verificationRequired) {
+            user.markEmailVerified(now);
+        }
         users.insert(user);
         events.userRegistered(user);
         audit.record(new AuditEvent(user.id(), email.value(), AuditEventType.USER_REGISTERED, client, now));
+        if (verificationRequired) {
+            verification.issue(user);
+        }
         return user;
     }
 }

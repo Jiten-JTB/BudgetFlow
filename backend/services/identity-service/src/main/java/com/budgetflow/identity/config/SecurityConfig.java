@@ -1,9 +1,14 @@
 package com.budgetflow.identity.config;
 
+import com.budgetflow.identity.adapter.in.security.DeletedUserSessionFilter;
+import com.budgetflow.identity.adapter.in.security.VerifiedEmailCheck;
+import com.budgetflow.identity.application.EmailVerificationService;
+import com.budgetflow.identity.application.port.UserRepository;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import com.budgetflow.identity.adapter.in.security.LoginOutcomeHandlers;
 import com.budgetflow.identity.adapter.in.security.UserDetailsServiceAdapter;
 import com.budgetflow.identity.application.LoginAttemptService;
-import com.budgetflow.identity.application.port.UserRepository;
 import java.time.Clock;
 import java.util.Map;
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
@@ -35,8 +40,9 @@ class SecurityConfig {
 
     @Bean
     @Order(1)
-    SecurityFilterChain authorizationServerFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain authorizationServerFilterChain(HttpSecurity http, UserRepository users) throws Exception {
         return http
+                .addFilterAfter(new DeletedUserSessionFilter(users), SecurityContextHolderFilter.class)
                 .oauth2AuthorizationServer(as -> {
                     as.oidc(Customizer.withDefaults());
                     http.securityMatcher(as.getEndpointsMatcher());
@@ -57,7 +63,8 @@ class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users", "/api/v1/users/email-verifications",
+                                "/api/v1/users/email-verifications/resend").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(rs -> rs.jwt(Customizer.withDefaults()))
                 .build();
@@ -65,18 +72,30 @@ class SecurityConfig {
 
     @Bean
     @Order(3)
-    SecurityFilterChain browserFilterChain(HttpSecurity http, LoginAttemptService loginAttempts) throws Exception {
+    SecurityFilterChain browserFilterChain(HttpSecurity http, LoginAttemptService loginAttempts,
+                                           EmailVerificationService verification, UserRepository users) throws Exception {
         return http
+                .addFilterAfter(new DeletedUserSessionFilter(users), SecurityContextHolderFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         // Actuator is served on the internal management port only (see application.yml).
                         .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
-                        .requestMatchers("/login", "/error", "/css/**", "/fonts/**").permitAll()
+                        .requestMatchers("/", "/login", "/error", "/css/**", "/fonts/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
                         .successHandler(new LoginOutcomeHandlers.Success(loginAttempts))
-                        .failureHandler(new LoginOutcomeHandlers.Failure(loginAttempts)))
+                        .failureHandler(new LoginOutcomeHandlers.Failure(loginAttempts, verification)))
                 .build();
+    }
+
+    /** Password first, then lockout/disabled, then (only for the rightful owner) whether the email is confirmed. */
+    @Bean
+    DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetails, PasswordEncoder encoder,
+                                                        UserRepository users) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetails);
+        provider.setPasswordEncoder(encoder);
+        provider.setPostAuthenticationChecks(new VerifiedEmailCheck(users));
+        return provider;
     }
 
     @Bean

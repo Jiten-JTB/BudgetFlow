@@ -19,6 +19,7 @@ public final class User {
     private Currency baseCurrency;
     private ZoneId timezone;
     private final UserStatus status;
+    private Instant emailVerifiedAt;
     private int failedLoginAttempts;
     private Instant lockedUntil;
     private Instant lastLoginAt;
@@ -27,8 +28,8 @@ public final class User {
     private long version;
 
     private User(UUID id, Email email, String passwordHash, String displayName, Currency baseCurrency, ZoneId timezone,
-                 UserStatus status, int failedLoginAttempts, Instant lockedUntil, Instant lastLoginAt,
-                 Instant createdAt, Instant updatedAt, long version) {
+                 UserStatus status, Instant emailVerifiedAt, int failedLoginAttempts, Instant lockedUntil,
+                 Instant lastLoginAt, Instant createdAt, Instant updatedAt, long version) {
         this.id = Objects.requireNonNull(id, "id");
         this.email = Objects.requireNonNull(email, "email");
         this.passwordHash = Objects.requireNonNull(passwordHash, "passwordHash");
@@ -36,6 +37,7 @@ public final class User {
         this.baseCurrency = Objects.requireNonNull(baseCurrency, "baseCurrency");
         this.timezone = Objects.requireNonNull(timezone, "timezone");
         this.status = Objects.requireNonNull(status, "status");
+        this.emailVerifiedAt = emailVerifiedAt;
         this.failedLoginAttempts = failedLoginAttempts;
         this.lockedUntil = lockedUntil;
         this.lastLoginAt = lastLoginAt;
@@ -47,15 +49,16 @@ public final class User {
     public static User register(UUID id, Email email, String passwordHash, String displayName,
                                 Currency baseCurrency, ZoneId timezone, Instant now) {
         return new User(id, email, passwordHash, validDisplayName(displayName), baseCurrency, timezone,
-                UserStatus.ACTIVE, 0, null, null, now, now, 0);
+                UserStatus.ACTIVE, null, 0, null, null, now, now, 0);
     }
 
     /** Rebuilds a persisted user; no validation beyond nulls, the database is trusted. */
     public static User rehydrate(UUID id, Email email, String passwordHash, String displayName, Currency baseCurrency,
-                                 ZoneId timezone, UserStatus status, int failedLoginAttempts, Instant lockedUntil,
-                                 Instant lastLoginAt, Instant createdAt, Instant updatedAt, long version) {
-        return new User(id, email, passwordHash, displayName, baseCurrency, timezone, status, failedLoginAttempts,
-                lockedUntil, lastLoginAt, createdAt, updatedAt, version);
+                                 ZoneId timezone, UserStatus status, Instant emailVerifiedAt, int failedLoginAttempts,
+                                 Instant lockedUntil, Instant lastLoginAt, Instant createdAt, Instant updatedAt,
+                                 long version) {
+        return new User(id, email, passwordHash, displayName, baseCurrency, timezone, status, emailVerifiedAt,
+                failedLoginAttempts, lockedUntil, lastLoginAt, createdAt, updatedAt, version);
     }
 
     public static String validDisplayName(String raw) {
@@ -65,6 +68,22 @@ public final class User {
                     "Display name must be 1-" + MAX_DISPLAY_NAME_LENGTH + " printable characters");
         }
         return name;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerifiedAt != null;
+    }
+
+    public Instant emailVerifiedAt() {
+        return emailVerifiedAt;
+    }
+
+    /** The owner proved they read this inbox. Keeps the first confirmation time. */
+    public void markEmailVerified(Instant now) {
+        if (emailVerifiedAt == null) {
+            emailVerifiedAt = now;
+            updatedAt = now;
+        }
     }
 
     public boolean isLockedAt(Instant now) {

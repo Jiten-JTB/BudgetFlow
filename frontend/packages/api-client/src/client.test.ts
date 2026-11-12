@@ -125,6 +125,24 @@ describe("api client", () => {
     expect(calls[0]?.headers.get("X-Forwarded-For")).toBe("203.0.113.9");
   });
 
+  it("confirms an email, asks for a new link, and deletes the account (no response bodies)", async () => {
+    const { fn, calls } = fakeFetch(204, undefined);
+    const api = createApiClient({ baseUrl: "https://api.test", fetch: fn });
+
+    await expect(api.users.verifyEmail("tok")).resolves.toBeUndefined();
+    await expect(api.users.resendVerification("a@example.com")).resolves.toBeUndefined();
+    await expect(api.me.delete("correct horse battery")).resolves.toBeUndefined();
+
+    expect(calls.map((c) => `${c.method} ${c.url}`)).toEqual([
+      "POST https://api.test/api/v1/users/email-verifications",
+      "POST https://api.test/api/v1/users/email-verifications/resend",
+      "DELETE https://api.test/api/v1/users/me",
+    ]);
+    expect(calls.map((c) => c.body)).toEqual([
+      JSON.stringify({ token: "tok" }), JSON.stringify({ email: "a@example.com" }), JSON.stringify({ password: "correct horse battery" }),
+    ]);
+  });
+
   it("encodes path ids and supports every resource the web app needs", async () => {
     const { fn, calls } = fakeFetch(200, { items: [], nextCursor: null });
     const api = createApiClient({ baseUrl: "https://api.test", fetch: fn });

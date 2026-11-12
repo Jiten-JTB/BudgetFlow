@@ -35,7 +35,10 @@ export async function forwardToApi(request: Request, segments: string[], session
       cache: "no-store",
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
-    return new Response(await upstream.text(), {
+    // 204/205/304 must not carry a body, not even an empty one: the Response constructor rejects it.
+    const text = await upstream.text();
+    const bodyless = upstream.status === 204 || upstream.status === 205 || upstream.status === 304;
+    return new Response(bodyless ? null : text, {
       status: upstream.status,
       headers: { "Content-Type": upstream.headers.get("content-type") ?? "application/json", "Cache-Control": "no-store" },
     });

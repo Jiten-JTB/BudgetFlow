@@ -1,5 +1,5 @@
 import { Circle, CircleCheck } from "lucide-react";
-import Link from "next/link";
+import { ActionLink } from "@/components/action-link";
 import type { SetupStep } from "./setup-steps";
 
 /**
@@ -28,28 +28,20 @@ export function SetupChecklist({ steps, hideAction }: {
       </div>
       <ol className="mt-4">
         {steps.map((s) => (
-          <li key={s.id} className="flex gap-3 border-t border-rule py-3">
+          <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-rule py-3">
             {s.done
-              ? <CircleCheck aria-hidden size={20} strokeWidth={1.75} className="mt-0.5 shrink-0 text-indigo" />
-              : <Circle aria-hidden size={20} strokeWidth={1.75} className="mt-0.5 shrink-0 text-mute" />}
-            <div className="min-w-0">
+              ? <CircleCheck aria-hidden size={20} strokeWidth={1.75} className="shrink-0 text-indigo" />
+              : <Circle aria-hidden size={20} strokeWidth={1.75} className="shrink-0 text-mute" />}
+            <div className="min-w-0 flex-1 basis-60">
               <p className="flex flex-wrap items-baseline gap-x-2">
-                {s.done ? (
-                  <>
-                    <span className="font-medium text-mute">{s.title}</span>
-                    <span className="text-sm font-medium text-indigo">Done</span>
-                  </>
-                ) : (
-                  <>
-                    <Link href={s.href} className="font-medium text-indigo underline">
-                      {s.title}
-                    </Link>
-                    {s.optional && <span className="text-sm text-mute">Optional</span>}
-                  </>
-                )}
+                <span className={s.done ? "font-medium text-mute" : "font-medium text-ink"}>{s.title}</span>
+                {s.done
+                  ? <span className="text-sm font-medium text-indigo">Done</span>
+                  : s.optional && <span className="text-sm text-mute">Optional</span>}
               </p>
               {!s.done && <p className="mt-0.5 text-sm text-mute">{s.detail}</p>}
             </div>
+            {!s.done && <div className="ml-8 sm:ml-0"><ActionLink href={s.href} size="sm">{s.action}</ActionLink></div>}
           </li>
         ))}
       </ol>

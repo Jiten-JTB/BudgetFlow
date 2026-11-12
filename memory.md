@@ -23,6 +23,8 @@ Durable rules and decisions. Read before any work.
 - **Deploy target (2026-11-10): Dokploy `admin.conceptkart.co.in`, VPS 89.116.21.116** (was `dokploy.conceptkart.cloud`, never used). Ask the user before ANY panel action; nothing critical or experimental.
 - Domains: `budgetflow.` (web), `budgetflow-api.` (gateway), `budgetflow-auth.` (auth) on `jitenjtb.com`.
 
+- **Schema changes are post-production now:** never edit `db/migrations/V1__baseline.sql`. Add a `V{n}__*.sql` migration and the same change in `db/schema.sql`; `DatabaseScriptsIT` checks they match.
+
 ## UI Work
 - Read `PRODUCT.md` (root) and `frontend/apps/web/DESIGN.md` before any UI change; impeccable artifacts live in `frontend/apps/web/.impeccable/`.
 - Money in the UI is always a decimal string through `@budgetflow/money`; never floats.

@@ -1,6 +1,7 @@
 package com.budgetflow.identity.adapter.in.security;
 
 import com.budgetflow.identity.adapter.in.web.ClientInfos;
+import com.budgetflow.identity.application.EmailVerificationService;
 import com.budgetflow.identity.application.LoginAttemptService;
 import com.budgetflow.identity.domain.AuditEventType;
 import jakarta.servlet.ServletException;
@@ -40,10 +41,12 @@ public final class LoginOutcomeHandlers {
 
     public static class Failure extends SimpleUrlAuthenticationFailureHandler {
         private final LoginAttemptService attempts;
+        private final EmailVerificationService verification;
 
-        public Failure(LoginAttemptService attempts) {
+        public Failure(LoginAttemptService attempts, EmailVerificationService verification) {
             super("/login?error");
             this.attempts = attempts;
+            this.verification = verification;
         }
 
         @Override
@@ -51,6 +54,13 @@ public final class LoginOutcomeHandlers {
                                             AuthenticationException exception) throws IOException, ServletException {
             String login = request.getParameter(USERNAME_PARAMETER);
             var client = ClientInfos.from(request);
+            if (exception instanceof EmailNotVerifiedException) {
+                // Right password, unconfirmed inbox: send a fresh link (throttled) and say so.
+                attempts.recordBlocked(login, AuditEventType.LOGIN_BLOCKED_UNVERIFIED, client);
+                verification.resend(login);
+                getRedirectStrategy().sendRedirect(request, response, "/login?unverified");
+                return;
+            }
             switch (exception) {
                 case LockedException e -> attempts.recordBlocked(login, AuditEventType.LOGIN_BLOCKED_LOCKED, client);
                 case DisabledException e -> attempts.recordBlocked(login, AuditEventType.LOGIN_BLOCKED_DISABLED, client);

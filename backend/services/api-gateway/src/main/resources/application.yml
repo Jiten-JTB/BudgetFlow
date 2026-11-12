@@ -11,12 +11,12 @@ spring:
       server:
         webflux:
           routes:
-            # Anonymous registration: strict per-IP limit (defaults: 5/min, burst 5).
+            # Anonymous sign-up and email verification: one strict per-IP bucket (defaults: 5/min, burst 5).
             - id: identity-registration
               uri: ${budgetflow.gateway.identity-uri}
               order: -1
               predicates:
-                - Path=/api/v1/users
+                - Path=/api/v1/users,/api/v1/users/email-verifications,/api/v1/users/email-verifications/resend
                 - Method=POST
               filters:
                 - name: RequestRateLimiter

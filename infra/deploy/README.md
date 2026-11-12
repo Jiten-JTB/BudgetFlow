@@ -104,6 +104,13 @@ Before restoring, stop the service that owns that database, then start it again 
 - **Health**: `docker ps` shows the healthcheck state. Actuator listens on the management ports, which are internal only.
 - **Postgres and RabbitMQ access**: `docker exec` into the container over SSH. Nothing is published on the host.
 
+## 8b. Email (verification links)
+
+- **Sender:** identity sends from `jiten@jitenjtb.com` through `smtp.hostinger.com:465` (SSL). The only secret is `SMTP_PASSWORD` in Dokploy's Environment. Without it, the deploy refuses to start.
+- **Delivery:** emails are queued in identity's `email_outbox` and retried with backoff. Each one is deleted once sent, because its link is a secret. A permanent failure logs `EMAIL UNDELIVERABLE`.
+- **DNS:** SPF, DKIM and DMARC for `jitenjtb.com` must be the Hostinger email records, or the mail lands in spam.
+- **Local:** Mailpit catches all email; its UI is at `http://localhost:${MAILPIT_UI_PORT:-8025}`.
+
 ## 9. Monitoring (Grafana)
 
 `https://budgetflow-grafana.jitenjtb.com`: sign in as `admin` with `GRAFANA_ADMIN_PASSWORD`. Sign-up and anonymous access are off. The **Budget Flow → Budget Flow overview** dashboard shows:

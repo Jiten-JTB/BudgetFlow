@@ -49,6 +49,12 @@ budgetflow:
       private-key: ${IDENTITY_SIGNING_KEY_PEM:}
       allow-ephemeral: false
     web-signup-url: ${IDENTITY_WEB_SIGNUP_URL:http://localhost:3000/signup}
+    web-verify-email-url: ${IDENTITY_WEB_VERIFY_EMAIL_URL:http://localhost:3000/verify-email}
+    # Mail server: SPRING_MAIL_HOST / _PORT / _USERNAME / _PASSWORD (+ SSL properties) from the environment.
+    email-verification:
+      required: ${IDENTITY_EMAIL_VERIFICATION_REQUIRED:true}
+    mail:
+      from: ${IDENTITY_MAIL_FROM:Budget Flow <no-reply@localhost>}
     lockout:
       max-failed-attempts: 5
       lock-duration: 15m

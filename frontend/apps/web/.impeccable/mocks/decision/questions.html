@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Budget Flow — questions</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}body{width:1440px;height:900px;overflow:hidden;background:#f4f3ef;color:#33322e;font-family:Mukta,system-ui,sans-serif;display:grid;grid-template-columns:1fr 300px 1fr}
+.num{font-feature-settings:"tnum" 1,"lnum" 1}
+.page{background:#fff;margin:40px 0;padding:56px 56px;box-shadow:0 8px 24px -12px rgb(38 48 92/.18)}
+.page.l{margin-left:40px;border-radius:10px 0 0 10px}.page.r{margin-right:40px;border-radius:0 10px 10px 0}
+.q{font-size:46px;line-height:1.08;font-weight:600;color:#26305c;letter-spacing:-.03em}
+.ans{margin-top:10px;color:#66635c;font-size:18px}
+.big{font-size:64px;font-weight:600;color:#26305c;letter-spacing:-.03em;margin:26px 0 12px}
+.row{display:flex;justify-content:space-between;border-top:1px solid #e3e0d9;padding:12px 0;font-size:18px}
+.neg{color:#9e2a20}
+.b{margin-top:22px}.b .t{display:flex;justify-content:space-between;font-size:18px}.b .t span:last-child{color:#66635c;font-size:16px}
+.track{height:8px;background:#e3e0d9;border-radius:4px;margin:8px 0 4px}.fill{height:8px;border-radius:4px}
+.w{font-size:16px}.ok{color:#26305c}.warn{color:#7a5300}.over{color:#9e2a20}
+.spine{background:#9e2a20;border-left:4px solid #e0a526;border-right:4px solid #e0a526;margin:40px 0;color:#f6e6d8;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:48px 26px;text-align:center}
+.word{font-size:26px;font-weight:700}.spine p{font-size:18px;line-height:1.4}
+.spine a{display:block;width:100%;padding:13px 0;border-radius:6px;font-weight:600;text-decoration:none;font-size:17px}
+.add{background:#e0a526;color:#26305c}.si{color:#f6e6d8;margin-top:8px}
+.ex{position:absolute;bottom:12px;left:40px;font-size:13px;color:#66635c}
+</style></head><body>
+<section class="page l"><h1 class="q">How much do I have?</h1><p class="ans">Every account, its exact balance, one total.</p>
+ <div class="big num">₹2,41,560</div>
+ <div class="row"><span>HDFC Savings</span><span class="num">₹1,52,685.00</span></div>
+ <div class="row"><span>SBI Salary</span><span class="num">₹74,000.00</span></div>
+ <div class="row"><span>Cash</span><span class="num">₹5,000.00</span></div>
+ <div class="row"><span>Paytm wallet</span><span class="num">₹2,375.00</span></div>
+ <div class="row"><span>Credit card</span><span class="num neg">−₹7,500.00</span></div></section>
+<aside class="spine"><span class="word">Budget Flow</span><p>A merchant’s ledger for your own money, kept exact.</p>
+ <div style="width:100%"><a class="add" href="#">Create your account</a><a class="si" href="#">Sign in</a></div></aside>
+<section class="page r"><h1 class="q">Am I on track this month?</h1><p class="ans">Budgets that warn early, in words.</p>
+ <div class="b"><div class="t"><span>Groceries</span><span class="num">₹9,840 of ₹12,000</span></div><div class="track"><div class="fill" style="width:82%;background:#e0a526"></div></div><span class="w warn num">₹2,160 left, past your 80% mark</span></div>
+ <div class="b"><div class="t"><span>Eating out</span><span class="num">₹3,115 of ₹6,000</span></div><div class="track"><div class="fill" style="width:52%;background:#26305c"></div></div><span class="w ok num">₹2,885 left</span></div>
+ <div class="b"><div class="t"><span>Shopping</span><span class="num">₹4,250 of ₹4,000</span></div><div class="track"><div class="fill" style="width:100%;background:#9e2a20"></div></div><span class="w over num">₹250 over</span></div>
+ <div class="b"><div class="t"><span>Travel</span><span class="num">₹4,260 of ₹8,000</span></div><div class="track"><div class="fill" style="width:53%;background:#26305c"></div></div><span class="w ok num">₹3,740 left</span></div></section>
+<span class="ex">Example figures</span>
+</body></html>

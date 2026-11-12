@@ -141,6 +141,17 @@ services:
       IDENTITY_WEB_POST_LOGOUT_URIS: https://budgetflow.jitenjtb.com/signed-out
       IDENTITY_WEB_SIGNUP_URL: https://budgetflow.jitenjtb.com/signup
       IDENTITY_SECURE_COOKIES: "true"
+      # Email verification: links open the web app; mail goes out through the Hostinger mailbox over SSL.
+      IDENTITY_EMAIL_VERIFICATION_REQUIRED: "true"
+      IDENTITY_WEB_VERIFY_EMAIL_URL: https://budgetflow.jitenjtb.com/verify-email
+      IDENTITY_MAIL_FROM: Budget Flow <jiten@jitenjtb.com>
+      SPRING_MAIL_HOST: smtp.hostinger.com
+      SPRING_MAIL_PORT: "465"
+      SPRING_MAIL_USERNAME: jiten@jitenjtb.com
+      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:?set SMTP_PASSWORD to the jiten@jitenjtb.com mailbox password}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT: "10000"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT: "10000"
       IDENTITY_DB_URL: jdbc:postgresql://budgetflow-postgres:5432/identity_db
       IDENTITY_DB_USER: identity_svc
       IDENTITY_DB_PASSWORD: ${IDENTITY_DB_PASSWORD:?set IDENTITY_DB_PASSWORD}
@@ -154,7 +165,7 @@ services:
       # Path allow-list (architecture.md §9): sign-in, OAuth2/OIDC and the sign-in page's own assets only.
       # /api/** is never served here; it goes through the gateway and its rate limits.
       traefik.http.routers.budgetflow-auth.rule: &auth-rule >-
-        Host(`budgetflow-auth.jitenjtb.com`) && (PathPrefix(`/oauth2/`) || PathPrefix(`/.well-known/`) ||
+        Host(`budgetflow-auth.jitenjtb.com`) && (Path(`/`) || PathPrefix(`/oauth2/`) || PathPrefix(`/.well-known/`) ||
         PathPrefix(`/connect/`) || Path(`/userinfo`) || Path(`/login`) || Path(`/logout`) || Path(`/error`) ||
         PathPrefix(`/css/`) || PathPrefix(`/fonts/`))
       traefik.http.routers.budgetflow-auth.entrypoints: web

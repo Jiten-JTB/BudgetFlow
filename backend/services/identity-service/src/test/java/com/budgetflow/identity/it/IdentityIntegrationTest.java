@@ -6,6 +6,9 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -22,6 +25,19 @@ public abstract class IdentityIntegrationTest {
             {"email":"%s","password":"correct horse battery","displayName":"Alice",
              "baseCurrency":"INR","timezone":"Asia/Kolkata"}""";
 
+    /** Started before any context: mail auto-configuration needs spring.mail.host when it is evaluated. */
+    protected static final Mailpit MAILPIT = new Mailpit();
+
+    static {
+        MAILPIT.start();
+    }
+
+    @DynamicPropertySource
+    static void mailServer(DynamicPropertyRegistry registry) {
+        registry.add("spring.mail.host", MAILPIT::getHost);
+        registry.add("spring.mail.port", () -> MAILPIT.getMappedPort(1025));
+    }
+
     @TestConfiguration(proxyBeanMethods = false)
     static class Containers {
         @Bean
@@ -35,6 +51,24 @@ public abstract class IdentityIntegrationTest {
         RabbitMQContainer rabbit() {
             return new RabbitMQContainer("rabbitmq:4-management-alpine");
         }
+
+    }
+
+    /** Real SMTP server with an HTTP API, so tests read the email a person would get. */
+    public static class Mailpit extends GenericContainer<Mailpit> {
+        Mailpit() {
+            super("axllent/mailpit:v1.21.8");
+            withExposedPorts(1025, 8025);
+        }
+
+        public String apiUrl() {
+            return "http://" + getHost() + ":" + getMappedPort(8025);
+        }
+    }
+
+    /** For tests about something other than verification: confirm the email as the link would. */
+    protected static void markEmailVerified(org.springframework.jdbc.core.simple.JdbcClient jdbc, String email) {
+        jdbc.sql("UPDATE users SET email_verified_at = now() WHERE email = :email").param("email", email).update();
     }
 
     protected static String uniqueEmail() {

@@ -15,10 +15,17 @@ public record IdentityProperties(
         @NotNull @Valid SigningKey signingKey,
         Lockout lockout,
         List<@Valid Client> clients,
-        String webSignupUrl) {
+        String webSignupUrl,
+        String webVerifyEmailUrl,
+        EmailVerification emailVerification,
+        Mail mail) {
 
     public IdentityProperties {
         webSignupUrl = webSignupUrl == null || webSignupUrl.isBlank() ? "http://localhost:3000/signup" : webSignupUrl;
+        webVerifyEmailUrl = webVerifyEmailUrl == null || webVerifyEmailUrl.isBlank()
+                ? "http://localhost:3000/verify-email" : webVerifyEmailUrl;
+        emailVerification = emailVerification == null ? new EmailVerification(true) : emailVerification;
+        mail = mail == null ? new Mail(null) : mail;
         lockout = lockout == null ? new Lockout(null, null) : lockout;
         clients = clients == null ? List.of() : clients;
     }
@@ -28,6 +35,16 @@ public record IdentityProperties(
      * @param allowEphemeral local/test only: generate a throwaway key when none is configured
      */
     public record SigningKey(@NotBlank String keyId, String privateKey, boolean allowEphemeral) {}
+
+    /** @param required false only where no mail server exists; new users then start verified */
+    public record EmailVerification(boolean required) {}
+
+    /** @param from sender address and name, e.g. {@code Budget Flow <jiten@jitenjtb.com>} */
+    public record Mail(String from) {
+        public Mail {
+            from = from == null || from.isBlank() ? "Budget Flow <no-reply@localhost>" : from;
+        }
+    }
 
     public record Lockout(Integer maxFailedAttempts, Duration lockDuration) {
         public Lockout {

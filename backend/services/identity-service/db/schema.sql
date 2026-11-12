@@ -31,6 +31,33 @@ CREATE TABLE users (
 
 CREATE UNIQUE INDEX ux_users_email ON users (email);
 
+-- One-time email verification links: only the SHA-256 of the token is stored.
+CREATE TABLE email_verification_token (
+    token_hash  CHAR(64)    PRIMARY KEY,
+    user_id     UUID        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    expires_at  TIMESTAMPTZ NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX ix_email_verification_token_user ON email_verification_token (user_id, created_at DESC);
+
+-- Emails queued in the same transaction as their cause; the relay delivers, then deletes them.
+CREATE TABLE email_outbox (
+    id              UUID         PRIMARY KEY,
+    recipient       VARCHAR(254) NOT NULL,
+    subject         VARCHAR(200) NOT NULL,
+    body_text       TEXT         NOT NULL,
+    body_html       TEXT,
+    attempts        INTEGER      NOT NULL DEFAULT 0,
+    next_attempt_at TIMESTAMPTZ  NOT NULL,
+    last_error      VARCHAR(500),
+    created_at      TIMESTAMPTZ  NOT NULL,
+    CONSTRAINT ck_email_outbox_attempts CHECK (attempts >= 0)
+);
+
+CREATE INDEX ix_email_outbox_due ON email_outbox (next_attempt_at);
+CREATE INDEX ix_email_outbox_recipient ON email_outbox (recipient);
+
 -- -----------------------------------------------------------------------------
 -- Security audit trail (append-only)
 -- -----------------------------------------------------------------------------
@@ -44,7 +71,8 @@ CREATE TABLE auth_audit_event (
     occurred_at    TIMESTAMPTZ  NOT NULL,
     CONSTRAINT ck_auth_audit_event_type CHECK (event_type IN (
         'USER_REGISTERED', 'LOGIN_SUCCESS', 'LOGIN_FAILURE', 'LOGIN_BLOCKED_LOCKED',
-        'LOGIN_BLOCKED_DISABLED', 'ACCOUNT_LOCKED', 'PROFILE_UPDATED'))
+        'LOGIN_BLOCKED_DISABLED', 'ACCOUNT_LOCKED', 'PROFILE_UPDATED',
+        'EMAIL_VERIFIED', 'LOGIN_BLOCKED_UNVERIFIED', 'USER_DELETED'))
 );
 
 CREATE INDEX ix_auth_audit_event_user ON auth_audit_event (user_id, occurred_at DESC);

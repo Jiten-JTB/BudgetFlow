@@ -34,12 +34,13 @@ class RegisterUserServiceTest {
     private final PasswordHasher hasher = mock(PasswordHasher.class);
     private final UserEventPublisher events = mock(UserEventPublisher.class);
     private final AuditLog audit = mock(AuditLog.class);
+    private final EmailVerificationService verification = mock(EmailVerificationService.class);
     private RegisterUserService service;
 
     @BeforeEach
     void setUp() {
         when(hasher.hash(any())).thenReturn("{argon2}hashed");
-        service = new RegisterUserService(users, hasher, events, audit, Clock.fixed(NOW, ZoneOffset.UTC));
+        service = new RegisterUserService(users, hasher, events, audit, verification, true, Clock.fixed(NOW, ZoneOffset.UTC));
     }
 
     @Test
@@ -85,6 +86,21 @@ class RegisterUserServiceTest {
         assertError(() -> service.register(new RegisterUserCommand(
                 "alice@example.com", "correct horse battery", "Alice", "INR", "Mars/Olympus"), CLIENT),
                 IdentityErrors.INVALID_TIMEZONE);
+    }
+
+    @Test
+    void sendsAVerificationEmailAndLeavesTheUserUnverified() {
+        User user = service.register(command("bob@example.com", "correct horse battery"), CLIENT);
+        assertThat(user.isEmailVerified()).isFalse();
+        verify(verification).issue(user);
+    }
+
+    @Test
+    void whenVerificationIsSwitchedOffUsersStartVerifiedAndNoEmailIsSent() {
+        service = new RegisterUserService(users, hasher, events, audit, verification, false, Clock.fixed(NOW, ZoneOffset.UTC));
+        User user = service.register(command("bob@example.com", "correct horse battery"), CLIENT);
+        assertThat(user.isEmailVerified()).isTrue();
+        verify(verification, never()).issue(any());
     }
 
     private static RegisterUserCommand command(String email, String password) {

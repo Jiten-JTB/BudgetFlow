@@ -1,4 +1,5 @@
 import { TransactionForm } from "@/features/transactions/transaction-form";
+import { ActionLink, EmptyState } from "@/components/action-link";
 import { serverApi } from "@/server/api";
 
 export const metadata = { title: "Add a transaction" };
@@ -18,9 +19,9 @@ export default async function NewTransactionPage({ searchParams }: { searchParam
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <h1 className="text-3xl font-semibold tracking-tight">Add a transaction</h1>
       {accounts.length === 0 ? (
-        <p className="rounded-sheet bg-panel p-7 text-mute shadow-sheet">
-          You need an account to record money against. <a href="/accounts/new" className="text-indigo underline">Open an account</a> first.
-        </p>
+        <div className="rounded-sheet bg-panel p-7 shadow-sheet">
+          <EmptyState text="You need an account to record money against." action="Open an account" href="/accounts/new" />
+        </div>
       ) : (
         <TransactionForm
           initialKind={kind}

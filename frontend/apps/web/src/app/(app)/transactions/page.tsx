@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TransactionRow } from "@/components/transaction-row";
 import { requestLocale } from "@/lib/locale";
 import { currentMonth, monthLabel, monthRange, parseMonth } from "@/lib/month";
+import { ActionLink, EmptyState } from "@/components/action-link";
 import { serverApi } from "@/server/api";
 
 export const metadata = { title: "Transactions" };
@@ -71,9 +72,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
       <section aria-labelledby="list-heading" className="rounded-sheet bg-panel p-6 shadow-sheet">
         <h2 id="list-heading" className="mb-3 text-lg font-semibold">{monthLabel(month, locale)}</h2>
         {page.items.length === 0 ? (
-          <p className="text-mute">
-            No transactions match these filters. <Link href="/transactions/new" className="text-indigo underline">Add a transaction</Link>
-          </p>
+          <EmptyState text="No transactions match these filters." action="Add a transaction" href="/transactions/new" />
         ) : (
           <table className="w-full text-left">
             <thead className="text-sm text-mute">

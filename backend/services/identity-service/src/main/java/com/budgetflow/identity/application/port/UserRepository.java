@@ -18,4 +18,10 @@ public interface UserRepository {
 
     /** @throws org.springframework.dao.OptimisticLockingFailureException if the user changed since it was read */
     void update(User user);
+
+    /**
+     * Erases the user and everything identity holds about them: verification tokens, queued emails, OAuth2
+     * authorizations and consents, and their audit trail.
+     */
+    void deleteWithAllData(User user);
 }

@@ -13,3 +13,9 @@ budgetflow:
         post-logout-redirect-uris: http://localhost:3000/
         scopes: openid,profile,budgetflow.api
     web-signup-url: https://budgetflow.test/signup
+    web-verify-email-url: https://budgetflow.test/verify-email
+    mail:
+      from: Budget Flow <no-reply@budgetflow.test>
+
+
+budgetflow.identity.mail.relay-interval: 200ms

@@ -20,7 +20,7 @@ class DatabaseScriptsIT {
 
     private static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17-alpine");
     private static final List<String> EXPECTED_TABLES = List.of(
-            "auth_audit_event", "inbox_message", "oauth2_authorization", "oauth2_authorization_consent",
+            "auth_audit_event", "email_outbox", "email_verification_token", "inbox_message", "oauth2_authorization", "oauth2_authorization_consent",
             "oauth2_registered_client", "outbox_message", "users");
 
     @BeforeAll
@@ -69,4 +69,10 @@ class DatabaseScriptsIT {
         }
         return names;
     }
+
+    @Test
+    void migrationsBuildExactlyTheSchemaInSchemaSql() throws Exception {
+        com.budgetflow.common.test.DatabaseScripts.assertMigrationsMatchSchema();
+    }
+
 }

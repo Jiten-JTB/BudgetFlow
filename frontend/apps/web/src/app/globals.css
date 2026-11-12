@@ -51,3 +51,15 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* The landing page's one authored moment: budget lines fill once, from the left, as the page opens. */
+@keyframes bf-fill {
+  from { transform: scaleX(0); }
+}
+.fill-in {
+  transform-origin: left center;
+  animation: bf-fill 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fill-in { animation: none; }
+}

@@ -51,6 +51,16 @@ describe("BFF proxy", () => {
     expect(fetchFn).not.toHaveBeenCalled();
   });
 
+  it("passes empty answers (204 No Content, 202 Accepted) through as empty, never as an error", async () => {
+    for (const status of [204, 202]) {
+      const fetchFn = vi.fn(async () => new Response(null, { status }));
+      const res = await forwardToApi(request("DELETE", "api/v1/users/me", { Origin: "https://app.test" }, '{"password":"x"}'),
+        ["api", "v1", "users", "me"], session, cfg, fetchFn as unknown as typeof fetch);
+      expect(res.status).toBe(status);
+      expect(await res.text()).toBe("");
+    }
+  });
+
   it("passes upstream errors through unchanged", async () => {
     const res = await forwardToApi(request("GET", "api/v1/accounts/x"), ["api", "v1", "accounts", "x"], session, cfg,
       upstream(404, '{"code":"ACCOUNT_NOT_FOUND"}') as unknown as typeof fetch);

@@ -50,4 +50,18 @@ class LoginPageIT extends IdentityIntegrationTest {
         mvc.perform(get("/css/login.css")).andExpect(status().isOk());
         mvc.perform(get("/fonts/mukta-600.woff2")).andExpect(status().isOk());
     }
+
+    @Test
+    void theSignInServersOwnAddressSendsVisitorsToTheBudgetFlowHomePage() throws Exception {
+        mvc.perform(get("/"))
+                .andExpect(status().isFound())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("https://budgetflow.test/"));
+    }
+
+    @Test
+    void tellsAnUnconfirmedUserToCheckTheirInbox() throws Exception {
+        mvc.perform(get("/login").param("unverified", ""))
+                .andExpect(content().string(containsString("Confirm your email first.")));
+    }
+
 }

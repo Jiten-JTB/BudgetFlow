@@ -39,7 +39,8 @@ describe("buildSetupSteps", () => {
     expect(setup.complete).toBe(true);
   });
 
-  it("links every step to the screen where it is done", () => {
+  it("links every step to the screen where it is done, with the action named", () => {
     expect(buildSetupSteps(fresh).steps.map((s) => s.href)).toEqual(["/accounts/new", "/income-sources", "/budgets/new", "/transactions/new"]);
+    expect(buildSetupSteps(fresh).steps.map((s) => s.action)).toEqual(["Open an account", "Add an income source", "Set a budget", "Add a transaction"]);
   });
 });

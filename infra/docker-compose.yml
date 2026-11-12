@@ -48,6 +48,12 @@ services:
       timeout: 3s
       retries: 20
 
+  # Catches every email locally (verification links); web UI and API on ${MAILPIT_UI_PORT:-8025}.
+  mailpit:
+    image: axllent/mailpit:v1.21.8
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+
   # --- Application services (opt-in): docker compose --profile apps up -d --build -------------------
   identity-service:
     profiles: [apps]
@@ -61,6 +67,10 @@ services:
       IDENTITY_WEB_REDIRECT_URIS: http://localhost:${WEB_PORT:-3000}/api/auth/callback
       IDENTITY_WEB_POST_LOGOUT_URIS: http://localhost:${WEB_PORT:-3000}/signed-out
       IDENTITY_WEB_SIGNUP_URL: http://localhost:${WEB_PORT:-3000}/signup
+      IDENTITY_WEB_VERIFY_EMAIL_URL: http://localhost:${WEB_PORT:-3000}/verify-email
+      IDENTITY_MAIL_FROM: Budget Flow <no-reply@budgetflow.local>
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: "1025"
       IDENTITY_DB_URL: jdbc:postgresql://postgres:5432/identity_db
       IDENTITY_DB_USER: identity_svc
       IDENTITY_DB_PASSWORD: ${SERVICE_DB_PASSWORD:-service_dev_password}
@@ -72,6 +82,7 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
+      mailpit: { condition: service_started }
 
   account-service:
     profiles: [apps]

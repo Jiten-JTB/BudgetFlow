@@ -20,6 +20,7 @@
       <p class="wordmark wordmark--small">Budget Flow</p>
       <h1>Sign in</h1>
       <p class="notice" role="status" th:if="${signedOut}">You’re signed out.</p>
+      <p class="notice" role="alert" th:if="${unverified}">Confirm your email first. We’ve sent a new link to your inbox; it works for 24 hours.</p>
       <p class="alert" role="alert" th:if="${failed}">That email and password don’t match. After 5 wrong tries, sign-in pauses for 15 minutes.</p>
       <form method="post" th:action="@{/login}" action="/login" novalidate>
         <label for="username">Email</label>

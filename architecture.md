@@ -154,7 +154,7 @@ Coverage gate: 80% line on domain/application.
 
 - Traefik routing:
   - `budgetflow-api.` → api-gateway `:8080`.
-  - `budgetflow-auth.` → identity-service `:9000`, **path allow-list only**: `/oauth2/`, `/.well-known/`, `/connect/`, `/userinfo`, `/login`, `/logout`, `/error`, `/css/`, `/fonts/` (branded sign-in page assets). `/api/**` must go through the gateway (rate limits).
+  - `budgetflow-auth.` → identity-service `:9000`, **path allow-list only**: `/` (redirects to the web app), `/oauth2/`, `/.well-known/`, `/connect/`, `/userinfo`, `/login`, `/logout`, `/error`, `/css/`, `/fonts/` (branded sign-in page assets). `/api/**` must go through the gateway (rate limits).
   - Management ports (`:8081`, `:9001`: health, Prometheus) are never routed.
   - Traefik must overwrite client `X-Forwarded-For` (default when `forwardedHeaders.insecure` is off); the gateway's per-IP rate limit relies on it.
 - Each service = Docker image (layered jar, `eclipse-temurin:25-jre` / CDS-enabled; GraalVM native optional for low-traffic services).

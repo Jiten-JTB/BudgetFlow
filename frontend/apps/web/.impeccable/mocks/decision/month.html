@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Budget Flow — month</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}body{width:1440px;height:900px;overflow:hidden;background:#9e2a20;color:#33322e;font-family:Mukta,system-ui,sans-serif}
+.num{font-feature-settings:"tnum" 1,"lnum" 1}
+.bar{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 56px;color:#f6e6d8}
+.word{font-size:22px;font-weight:700}.bar nav{display:flex;gap:10px}.bar a{color:#f6e6d8;text-decoration:none;font-weight:500;padding:8px 14px}
+.bar .add{background:#e0a526;color:#26305c;border-radius:6px;font-weight:600}
+.book{margin:10px 40px 0;height:820px;background:#fff;border-radius:10px 10px 0 0;border-top:4px solid #e0a526;display:grid;grid-template-columns:1fr 2px 1fr}
+.head{grid-column:1/-1;padding:30px 48px 18px;display:flex;justify-content:space-between;align-items:end;border-bottom:1px solid #e3e0d9}
+h1{font-size:40px;color:#26305c;font-weight:600;letter-spacing:-.025em;line-height:1.1;max-width:780px}
+.head p{color:#66635c;font-size:16px;text-align:right}
+.page{padding:22px 48px}.page h2{display:flex;justify-content:space-between;font-size:20px;color:#26305c;font-weight:600;margin-bottom:8px}
+.gutter{background:repeating-linear-gradient(#e0a526 0 10px,transparent 10px 18px)}
+.row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;padding:10px 0;border-top:1px solid #e3e0d9;font-size:17px;align-items:baseline}
+.d{color:#66635c;font-size:15px}.in{color:#26305c}.out{color:#9e2a20}
+.pend{color:#66635c;font-size:14px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#e0a526;margin-right:6px}
+.tot{display:flex;justify-content:space-between;border-top:2px solid #26305c;margin-top:6px;padding-top:10px;font-weight:600;font-size:19px}
+.cta{grid-column:1/-1;display:flex;gap:12px;justify-content:center;padding:18px;border-top:1px solid #e3e0d9;background:#f4f3ef}
+.cta a{font-weight:600;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:17px}.p{background:#26305c;color:#fff}.q{color:#26305c}
+</style></head><body>
+<div class="bar"><span class="word">Budget Flow</span><nav><a href="#">Sign in</a><a class="add" href="#">Create your account</a></nav></div>
+<div class="book">
+ <div class="head"><h1>Write it down once. The books balance themselves.</h1><p>Example month<br>November 2026</p></div>
+ <div class="page"><h2><span>Money in</span><span class="num in">+₹1,28,500.00</span></h2>
+  <div class="row"><span class="d num">1 Nov</span><span>Salary, Acme Corp</span><span class="num in">+₹1,10,000.00</span></div>
+  <div class="row"><span class="d num">14 Nov</span><span>Logo project, Studio Kalam</span><span class="num in">+₹18,500.00</span></div>
+  <div class="row"><span class="d num">20 Nov</span><span>Moved to savings <span class="pend">(transfer, not income)</span></span><span class="num">₹25,000.00</span></div>
+  <div class="tot"><span>Kept this month</span><span class="num in">₹79,285.00</span></div></div>
+ <div class="gutter"></div>
+ <div class="page"><h2><span>Money out</span><span class="num out">−₹49,215.00</span></h2>
+  <div class="row"><span class="d num">2 Nov</span><span>Rent</span><span class="num out">−₹32,000.00</span></div>
+  <div class="row"><span class="d num">3 Nov</span><span>Groceries, BigBasket</span><span class="num out">−₹2,315.00</span></div>
+  <div class="row"><span class="d num">9 Nov</span><span>Train to Pune</span><span class="num out">−₹4,260.00</span></div>
+  <div class="row"><span class="d num">16 Nov</span><span>Groceries, local market</span><span class="num out">−₹7,525.00</span></div>
+  <div class="row"><span class="d num">22 Nov</span><span>Dinner with family</span><span class="num out">−₹3,115.00</span></div>
+  <div class="row"><span class="d num">Today</span><span><span class="dot"></span>Chai and snacks <span class="pend">Confirming</span></span><span class="num out">−₹140.00</span></div></div>
+ <div class="cta"><a class="p" href="#">Open your own books</a><a class="q" href="#">Sign in</a></div>
+</div></body></html>

@@ -116,6 +116,33 @@ _Last updated: 2026-11-10 (deployed + Grafana)_
 - Transaction form: an empty Income source field shows "None yet. Add an income source", and a transfer with one account explains it needs two.
 - Tests: web 102 unit; E2E 9/9 (new `e2e/onboarding.spec.ts`; axe passes on the overview with the checklist showing). Detector clean. DESIGN.md updated. Ships as v0.1.3.
 
+## v0.1.4 work (2026-11-10): buttons, verification, account deletion, landing page
+- **Buttons:** actions that open a screen are `ActionLink` (a secondary button that is still a link). Empty states use `EmptyState`. Each open checklist step has its own action button.
+- **Flyway post-production:**
+  - V1 is frozen per service as `db/migrations/V1__baseline.sql`, byte-identical to what production ran, and the POM packages `db/migrations/`.
+  - `DatabaseScriptsIT.migrationsBuildExactlyTheSchemaInSchemaSql` proves that the migrations equal `schema.sql`.
+  - The V1 → V2 upgrade was verified on a live local database: all 89 existing users were backfilled as verified.
+- **Email verification (identity V2):**
+  - SHA-256-hashed one-time tokens, valid 24 hours, sent through an `email_outbox` table and an SMTP relay (SKIP LOCKED, backoff, row deleted once sent).
+  - The login check runs after the password, so it never reveals whether an address has an account.
+  - Resend is throttled to one per minute and silent.
+  - New public endpoints `POST /api/v1/users/email-verifications` and `/resend`, sharing the gateway's sign-up limit per IP.
+  - Web pages: `/signup/check-email` (the pending address is kept in a 1-hour httpOnly cookie, never in the URL) and `/verify-email` (a button, not confirm-on-load).
+- **Delete account:**
+  - `DELETE /api/v1/users/me {password}`: identity erases the user, tokens, queued mail, OAuth authorizations and their audit trail. One `USER_DELETED` audit row is kept, with no email.
+  - It publishes `identity.UserDeleted`. The shared `UserDataEraser` (common-messaging) erases account, transaction, budget and orchestrator data, plus published outbox rows that mention the user.
+  - `DeletedUserSessionFilter` ends the identity sign-in session of an erased user.
+  - Web: Settings → Delete my account (confirmed with the password) → `/account-deleted`.
+- **BFF fix:** 204/205/304 responses from the gateway were turned into 502s, because a body-less status can't carry a body.
+- **Landing page:** `/` for signed-out visitors is rewritten to `/welcome`. Direction is "Two questions", locked by the user (seed:fa54717c842d905f, brief `surfaces/frontend-apps-web-src-app-welcome.md`). Example data reconciles (tested). The finish review says ship (`.impeccable/review/landing-finish-review.md`). DESIGN.md is updated.
+- **Auth domain root:** `/` redirects to the web home (added to the Traefik allow-list).
+- **Tests:**
+  - Backend: everything green, including coverage gates.
+  - Web: 127 unit tests, and 10 api-client tests.
+  - E2E 12/12 with real email through Mailpit.
+  - `test-deploy.sh` passes.
+- **Ships as v0.1.4.** Needs `SMTP_PASSWORD` in Dokploy and Hostinger mail DNS (SPF/DKIM/DMARC).
+
 ## Commands
 - Build + all tests: `cd backend && ./mvnw verify`
 - Local infra: `docker compose -f infra/docker-compose.yml up -d`
@@ -127,7 +154,7 @@ _Last updated: 2026-11-10 (deployed + Grafana)_
 
 ## Open Decisions
 - Grafana: built (2026-11-10). Open: alert contact point (email or Telegram).
-- Email provider for notification-service
+- Email provider: Hostinger SMTP (jiten@jitenjtb.com) for identity; notification-service later
 
 ## Notes
 - Production secrets needed (Dokploy env, when deploying): `IDENTITY_SIGNING_KEY_PEM` (RSA 2048+ PKCS#8), `IDENTITY_WEB_CLIENT_SECRET`, DB/RabbitMQ/Redis passwords. Issuer = `https://budgetflow-auth.jitenjtb.com`.

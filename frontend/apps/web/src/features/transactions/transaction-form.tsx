@@ -8,6 +8,7 @@ import { AmountInput } from "@/components/amount-input";
 import { Field, inputClass } from "@/components/form-kit";
 import { navigatorLocale } from "@/lib/navigator-locale";
 import { awaitOutcome } from "./await-outcome";
+import { ActionLink } from "@/components/action-link";
 import { type FieldErrors, type FormState, type Kind, toRecordInput } from "./form-model";
 
 export type FormApi = {
@@ -184,10 +185,10 @@ export function TransactionForm({ accounts, categories, incomeSources, today, in
                       {accounts.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.currency})</option>)}
                     </select>
                     {accounts.length < 2 && (
-                      <p className="text-sm text-mute">
-                        Transfers move money between two of your accounts.{" "}
-                        <Link href="/accounts/new" className="text-indigo underline">Open another account</Link>
-                      </p>
+                      <div className="flex flex-col items-start gap-2">
+                        <p className="text-sm text-mute">Transfers move money between two of your accounts.</p>
+                        <ActionLink href="/accounts/new" size="sm">Open another account</ActionLink>
+                      </div>
                     )}
                   </>
                 )}
@@ -213,9 +214,10 @@ export function TransactionForm({ accounts, categories, incomeSources, today, in
                     {incomeSources.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                   {incomeSources.length === 0 && (
-                    <p className="text-sm text-mute">
-                      None yet. <Link href="/income-sources" className="text-indigo underline">Add an income source</Link>
-                    </p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <p className="text-sm text-mute">None yet.</p>
+                      <ActionLink href="/income-sources" size="sm">Add an income source</ActionLink>
+                    </div>
                   )}
                 </>)}
               </Field>

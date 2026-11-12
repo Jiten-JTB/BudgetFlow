@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { authConfig } from "@/server/auth/config";
 import { refreshSession } from "@/server/auth/oauth";
-import { isPublicPath } from "@/server/auth/paths";
+import { isPublicPath, signedOutPage } from "@/server/auth/paths";
 import { PATH_HEADER } from "@/server/sign-in-redirect";
 import { type Session, SESSION_COOKIE, SESSION_MAX_AGE_SECONDS, seal, sessionDecision, unseal } from "@/server/auth/session";
 
@@ -22,6 +22,13 @@ export async function proxy(request: NextRequest) {
 
   const refreshed = decision === "refresh" ? await refreshOnce(session!) : null;
   if (!refreshed) {
+    const landing = signedOutPage(pathname);
+    if (landing) {
+      // "/" stays the address; signed-out visitors simply see what Budget Flow is.
+      const res = NextResponse.rewrite(new URL(landing, request.url));
+      if (session) res.cookies.delete(SESSION_COOKIE);
+      return res;
+    }
     if (pathname.startsWith("/api/")) {
       const res = NextResponse.next();
       res.cookies.delete(SESSION_COOKIE);

@@ -87,17 +87,29 @@ export function createApiClient(options: ApiClientOptions) {
     return { response, body };
   }
 
+  /** For endpoints that answer 202/204 with no body. */
+  async function callNoContent(method: string, path: string, opts: RequestOptions = {}): Promise<void> {
+    await send(method, path, opts);
+  }
+
   const id = encodeURIComponent;
 
   return {
     users: {
       register: (input: { email: string; password: string; displayName: string; baseCurrency: string; timezone: string }) =>
         call("POST", "/api/v1/users", S.User, { body: input }).then((r) => r.data),
+      /** The token from the emailed link; works once, within 24 hours. */
+      verifyEmail: (token: string) => callNoContent("POST", "/api/v1/users/email-verifications", { body: { token } }),
+      /** Always succeeds: the server never says whether the address has an account. */
+      resendVerification: (email: string) =>
+        callNoContent("POST", "/api/v1/users/email-verifications/resend", { body: { email } }),
     },
     me: {
       get: () => call("GET", "/api/v1/users/me", S.User).then((r) => r.data),
       update: (input: { displayName?: string; baseCurrency?: string; timezone?: string }) =>
         call("PATCH", "/api/v1/users/me", S.User, { body: input }).then((r) => r.data),
+      /** Permanently erases the account and all its data; the password confirms it is really them. */
+      delete: (password: string) => callNoContent("DELETE", "/api/v1/users/me", { body: { password } }),
     },
     accounts: {
       list: (q: { includeArchived?: boolean } = {}) =>

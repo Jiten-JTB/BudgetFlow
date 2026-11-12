@@ -103,7 +103,7 @@ describe("OverviewView", () => {
   });
 
   it("shows the setup steps above the spread only when given", () => {
-    const steps = [{ id: "accounts" as const, title: "Add the accounts you use", detail: "d", href: "/accounts/new", optional: false, done: false }];
+    const steps = [{ id: "accounts" as const, title: "Add the accounts you use", detail: "d", action: "Open an account", href: "/accounts/new", optional: false, done: false }];
     const { unmount } = render(<OverviewView overview={base} month="2026-11" monthTitle="November 2026" locale="en-IN"
       accountNames={{}} categoryNames={{}} isCurrentMonth setup={{ steps, hideAction: () => {} }} />);
     const setup = screen.getByRole("region", { name: "Set up your books" });

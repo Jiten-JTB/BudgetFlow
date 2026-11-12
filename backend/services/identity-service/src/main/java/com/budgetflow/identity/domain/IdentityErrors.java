@@ -15,6 +15,8 @@ public final class IdentityErrors {
     public static final ErrorCode INVALID_TIMEZONE = ErrorCode.of("INVALID_TIMEZONE", VALIDATION);
     public static final ErrorCode EMAIL_ALREADY_REGISTERED = ErrorCode.of("EMAIL_ALREADY_REGISTERED", CONFLICT);
     public static final ErrorCode USER_NOT_FOUND = ErrorCode.of("USER_NOT_FOUND", NOT_FOUND);
+    public static final ErrorCode INVALID_VERIFICATION_TOKEN = ErrorCode.of("INVALID_VERIFICATION_TOKEN", VALIDATION);
+    public static final ErrorCode INCORRECT_PASSWORD = ErrorCode.of("INCORRECT_PASSWORD", VALIDATION);
 
     private IdentityErrors() {}
 }

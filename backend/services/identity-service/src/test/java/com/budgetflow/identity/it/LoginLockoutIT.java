@@ -54,8 +54,10 @@ class LoginLockoutIT extends IdentityIntegrationTest {
     }
 
     private String register(String email) throws Exception {
-        return JsonPath.read(mvc.perform(post("/api/v1/users").contentType(MediaType.APPLICATION_JSON)
+        String id = JsonPath.read(mvc.perform(post("/api/v1/users").contentType(MediaType.APPLICATION_JSON)
                 .content(REGISTER_JSON.formatted(email))).andReturn().getResponse().getContentAsString(), "$.id");
+        markEmailVerified(jdbc, email);
+        return id;
     }
 
     private String login(String email, String password) throws Exception {

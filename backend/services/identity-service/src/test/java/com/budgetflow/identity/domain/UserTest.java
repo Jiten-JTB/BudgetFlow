@@ -92,6 +92,22 @@ class UserTest {
         assertThat(user.updatedAt()).isEqualTo(later);
     }
 
+    @Test
+    void aNewUserHasNotConfirmedTheirEmail() {
+        User user = newUser();
+        assertThat(user.isEmailVerified()).isFalse();
+        assertThat(user.emailVerifiedAt()).isNull();
+    }
+
+    @Test
+    void confirmingTheEmailRecordsWhenAndIsIdempotent() {
+        User user = newUser();
+        user.markEmailVerified(NOW.plusSeconds(60));
+        user.markEmailVerified(NOW.plusSeconds(600));
+        assertThat(user.isEmailVerified()).isTrue();
+        assertThat(user.emailVerifiedAt()).isEqualTo(NOW.plusSeconds(60));
+    }
+
     private static User newUser() {
         return User.register(UUID.randomUUID(), Email.of("alice@example.com"), "{argon2}hash", "  Alice ",
                 Currency.getInstance("INR"), ZoneId.of("Asia/Kolkata"), NOW);

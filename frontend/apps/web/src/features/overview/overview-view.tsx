@@ -6,6 +6,7 @@ import { TransactionRow } from "@/components/transaction-row";
 import { shiftMonth } from "@/lib/month";
 import type { LedgerPage, Overview } from "./build-overview";
 import { SetupChecklist } from "./setup-checklist";
+import { ActionLink, EmptyState } from "@/components/action-link";
 import type { SetupStep } from "./setup-steps";
 
 type Props = {
@@ -83,7 +84,7 @@ export function OverviewView({ overview: o, month, monthTitle, locale, accountNa
             <Link href="/accounts" className="text-sm text-indigo underline">All accounts</Link>
           </div>
           {o.accounts.items.length === 0 ? (
-            <p className="text-mute">No accounts yet. <Link href="/accounts/new" className="text-indigo underline">Open an account</Link></p>
+            <EmptyState text="No accounts yet." action="Open an account" href="/accounts/new" />
           ) : (
             <ul>
               {o.accounts.items.map((a) => (
@@ -102,7 +103,7 @@ export function OverviewView({ overview: o, month, monthTitle, locale, accountNa
             <Link href="/budgets" className="text-sm text-indigo underline">All budgets</Link>
           </div>
           {o.budgets.length === 0 ? (
-            <p className="text-mute">No budgets yet. <Link href="/budgets/new" className="text-indigo underline">Set a budget</Link> to get a warning before you overspend.</p>
+            <EmptyState text="No budgets yet. A budget warns you before a category runs over." action="Set a budget" href="/budgets/new" />
           ) : (
             <ul className="flex flex-col gap-4">
               {o.budgets.map((b) => <BudgetRow key={b.budget.id} status={b} locale={locale} />)}
@@ -161,9 +162,7 @@ function LedgerSide({ id, title, page, currency, locale, tone, empty, hrefFor }:
         <Money amount={page.total} currency={currency} locale={locale} size="lg" tone={tone} />
       </div>
       {page.rows.length === 0 ? (
-        <p className="text-mute">
-          {empty.text} <Link href={empty.href} className="text-indigo underline">{empty.action}</Link>
-        </p>
+        <EmptyState text={empty.text} action={empty.action} href={empty.href} />
       ) : (
         <ul>
           {page.rows.map((r) => (

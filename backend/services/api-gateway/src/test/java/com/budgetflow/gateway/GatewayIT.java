@@ -209,6 +209,28 @@ class GatewayIT {
         client.get().uri("/actuator/prometheus").exchange().expectStatus().isUnauthorized();
     }
 
+    @Test
+    void emailVerificationIsPublicAndSharesTheSignUpLimitPerIp() {
+        int before = UPSTREAM.proxiedRequests.get();
+        anonymousPost("/api/v1/users/email-verifications", "198.51.100.9", "{\"token\":\"t\"}").expectStatus().isOk();
+        anonymousPost("/api/v1/users/email-verifications/resend", "198.51.100.9", "{\"email\":\"a@example.com\"}")
+                .expectStatus().isOk();
+        assertThat(UPSTREAM.proxiedRequests.get()).isEqualTo(before + 2);
+        anonymousPost("/api/v1/users/email-verifications/resend", "198.51.100.9", "{\"email\":\"a@example.com\"}")
+                .expectStatus().isEqualTo(429);
+    }
+
+    @Test
+    void deletingTheAccountNeedsAToken() {
+        client.method(HttpMethod.DELETE).uri("/api/v1/users/me").contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"password\":\"x\"}").exchange().expectStatus().isUnauthorized();
+    }
+
+    private WebTestClient.ResponseSpec anonymousPost(String path, String clientIp, String json) {
+        return client.post().uri(path).header("X-Forwarded-For", clientIp)
+                .contentType(MediaType.APPLICATION_JSON).bodyValue(json).exchange();
+    }
+
     private WebTestClient.ResponseSpec register(String clientIp) {
         return client.post().uri("/api/v1/users")
                 .header("X-Forwarded-For", clientIp)

@@ -23,8 +23,8 @@ public class JdbcAuditLog implements AuditLog {
                 .param("userId", event.userId())
                 .param("principal", event.principal())
                 .param("type", event.type().name())
-                .param("remoteAddress", event.client().remoteAddress())
-                .param("userAgent", event.client().userAgent())
+                .param("remoteAddress", event.client() == null ? null : event.client().remoteAddress())
+                .param("userAgent", event.client() == null ? null : event.client().userAgent())
                 .param("occurredAt", JdbcUserRepository.toDb(event.occurredAt()))
                 .update();
     }

@@ -173,6 +173,7 @@ A committed shell (vermilion rail) around a restrained working surface (white sh
 - **Title** (600, 1.125rem, 1.2): the heading at the top of each sheet.
 - **Body** (400, 0.9375rem, 1.5): prose, table rows and controls.
 - **Label** (500, 0.875rem): field labels and column heads, sentence case.
+- **Landing question** (600, 2.25rem on phones / 2.75rem from 640px, 1.05, -0.025em): only the two questions that open the signed-out landing page. Persuade-surface step; never used inside the app.
 - **Money ramp** (tabular, lining figures): xl 2.5rem/600 (the struck balance, an account's balance), lg 1.75rem/600 (page totals, "You have"), md 1.25rem/600 (account rows on lists), sm 0.9375rem/500 (table amounts), xs 0.8125rem (footnotes).
 
 ### Named Rules
@@ -240,6 +241,16 @@ Name, "spent of limit" in tabular figures, an 8px bar (indigo on track, turmeric
 - **Never gamified.**
 
 Empty choices point to where they are filled: the Income source field says "None yet. Add an income source", and a transfer with a single account explains that it needs two.
+
+### Landing page (signed-out home)
+- **Structure:** one ledger opened. The first spread puts "How much do I have?" (accounts and their total) on the left page and "Am I on track this month?" (budgets) on the right page.
+- **Spine:** a vermilion bookcloth spine edged with turmeric thread carries the wordmark as the h1, one line of purpose, and the actions: Create your account (turmeric) and Sign in. On phones the spine becomes the top band, with the thread under it.
+- **Below the fold:** further spreads, never cards: the facing-page money in/out with Kept at a dashed spine, a ledger excerpt with balance after each entry, the add-transaction form as it looks, then privacy and Coming next on facing pages with a dashed thread gutter.
+- **Example data:** every figure comes from `features/welcome/example-ledger.ts`, is labelled "Example", and reconciles; a test proves it.
+- **Motion:** one moment only. The budget bars fill once from the left (720ms ease-out-expo, staggered 90ms), and stay static under reduced motion.
+
+### Buttons that navigate
+Actions that open another screen (Open an account, Set a budget, Add an income source) are links drawn as secondary buttons: white, Pressed Rule border, indigo text (`components/action-link.tsx`). Empty states say what is missing, then offer that one action (`EmptyState`). Navigation links (All accounts, Show older) stay text links.
 
 ### Status note
 Pending transactions show "Confirming" with a small pulsing turmeric dot (still under reduced motion: the animation stops); cancelled ones are struck through with "Cancelled: <reason>" in vermilion.

@@ -5,11 +5,11 @@ import { SetupChecklist } from "./setup-checklist";
 import type { SetupStep } from "./setup-steps";
 
 const step = (p: Partial<SetupStep>): SetupStep =>
-  ({ id: "accounts", title: "Add the accounts you use", detail: "Banks and wallets.", href: "/accounts/new", optional: false, done: false, ...p });
+  ({ id: "accounts", title: "Add the accounts you use", detail: "Banks and wallets.", action: "Open an account", href: "/accounts/new", optional: false, done: false, ...p });
 const steps: SetupStep[] = [
   step({ done: true }),
-  step({ id: "income-sources", title: "Name where your money comes from", href: "/income-sources", optional: true }),
-  step({ id: "first-transaction", title: "Record your first transaction", href: "/transactions/new" }),
+  step({ id: "income-sources", title: "Name where your money comes from", action: "Add an income source", href: "/income-sources", optional: true }),
+  step({ id: "first-transaction", title: "Record your first transaction", action: "Add a transaction", href: "/transactions/new" }),
 ];
 
 describe("SetupChecklist", () => {
@@ -20,13 +20,13 @@ describe("SetupChecklist", () => {
     expect(region).toHaveTextContent("1 of 3 done");
   });
 
-  it("links the steps still to do, and says Done (not a link) for finished ones", () => {
+  it("offers each open step's action as a button, and says Done (no button) for finished ones", () => {
     render(<SetupChecklist steps={steps} hideAction={vi.fn()} />);
-    expect(screen.queryByRole("link", { name: /Add the accounts you use/ })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Open an account" })).toBeNull();
     const [first] = screen.getAllByRole("listitem");
     expect(first).toHaveTextContent("Done");
-    expect(screen.getByRole("link", { name: /Name where your money comes from/ })).toHaveAttribute("href", "/income-sources");
-    expect(screen.getByRole("link", { name: /Record your first transaction/ })).toHaveAttribute("href", "/transactions/new");
+    expect(screen.getByRole("link", { name: "Add an income source" })).toHaveAttribute("href", "/income-sources");
+    expect(screen.getByRole("link", { name: "Add a transaction" })).toHaveAttribute("href", "/transactions/new");
   });
 
   it("marks optional steps in words", () => {

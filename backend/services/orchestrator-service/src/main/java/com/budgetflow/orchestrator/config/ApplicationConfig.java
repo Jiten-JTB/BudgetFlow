@@ -1,5 +1,9 @@
 package com.budgetflow.orchestrator.config;
 
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import java.util.List;
+import com.budgetflow.common.messaging.erasure.UserDataEraser;
 import com.budgetflow.common.messaging.config.Exchanges;
 import com.budgetflow.common.messaging.consumer.QueueTopology;
 import com.budgetflow.common.messaging.inbox.IdempotentConsumer;
@@ -20,6 +24,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 @Configuration(proxyBeanMethods = false)
 class ApplicationConfig {
+
+    static final String USER_DELETED_QUEUE = "orchestrator-service.user-deleted";
 
     @Bean
     Clock clock() {
@@ -59,4 +65,23 @@ class ApplicationConfig {
     SagaReplyListener sagaReplyListener(IdempotentConsumer inbox, SagaCoordinator coordinator, JsonMapper json) {
         return new SagaReplyListener(inbox, coordinator, json);
     }
+
+    /** identity.UserDeleted: erase every row this service keeps for the user (children before parents). */
+    @Bean
+    Declarables userDeletedTopology() {
+        return UserDataEraser.topology(USER_DELETED_QUEUE);
+    }
+
+    @Bean
+    SimpleMessageListenerContainer userDeletedListener(UserDataEraser eraser, SimpleRabbitListenerContainerFactory factory) {
+        return eraser.container(factory);
+    }
+
+    @Bean
+    UserDataEraser userDataEraser(IdempotentConsumer inbox, JdbcClient jdbc) {
+        return new UserDataEraser(USER_DELETED_QUEUE, "orchestrator.user-deleted", inbox, jdbc, List.of(
+                "DELETE FROM saga_event WHERE saga_id IN (SELECT id FROM saga_instance WHERE user_id = :userId)",
+                "DELETE FROM saga_instance WHERE user_id = :userId"));
+    }
+
 }
