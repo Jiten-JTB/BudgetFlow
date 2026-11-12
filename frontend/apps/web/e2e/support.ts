@@ -4,7 +4,7 @@ import { expect, type Page } from "@playwright/test";
 export const PASSWORD = "plum orchard sunrise";
 
 /** Local Mailpit (infra/docker-compose.yml) catches the emails the stack sends. */
-const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:58025";
+const MAILPIT = process.env.MAILPIT_URL ?? `http://localhost:${process.env.MAILPIT_UI_PORT ?? "8025"}`;
 
 export function uniqueEmail(): string {
   return `e2e-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;

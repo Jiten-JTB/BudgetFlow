@@ -59,6 +59,7 @@ jobs:
         working-directory: frontend/apps/web
         env:
           E2E_BASE_URL: http://localhost:3300
+          MAILPIT_URL: http://localhost:8025   # local mail catcher from infra/docker-compose.yml
           CI: "true"
         run: pnpm e2e
       - uses: actions/upload-artifact@v4
