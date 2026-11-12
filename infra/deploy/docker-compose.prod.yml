@@ -144,11 +144,11 @@ services:
       # Email verification: links open the web app; mail goes out through the Hostinger mailbox over SSL.
       IDENTITY_EMAIL_VERIFICATION_REQUIRED: "true"
       IDENTITY_WEB_VERIFY_EMAIL_URL: https://budgetflow.jitenjtb.com/verify-email
-      IDENTITY_MAIL_FROM: Budget Flow <jiten@jitenjtb.com>
+      IDENTITY_MAIL_FROM: Budget Flow <app@jitenjtb.com>
       SPRING_MAIL_HOST: smtp.hostinger.com
       SPRING_MAIL_PORT: "465"
-      SPRING_MAIL_USERNAME: jiten@jitenjtb.com
-      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:?set SMTP_PASSWORD to the jiten@jitenjtb.com mailbox password}
+      SPRING_MAIL_USERNAME: app@jitenjtb.com
+      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:?set SMTP_PASSWORD to the app@jitenjtb.com mailbox password}
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: "true"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT: "10000"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT: "10000"

@@ -39,7 +39,7 @@ public record IdentityProperties(
     /** @param required false only where no mail server exists; new users then start verified */
     public record EmailVerification(boolean required) {}
 
-    /** @param from sender address and name, e.g. {@code Budget Flow <jiten@jitenjtb.com>} */
+    /** @param from sender address and name, e.g. {@code Budget Flow <app@jitenjtb.com>} */
     public record Mail(String from) {
         public Mail {
             from = from == null || from.isBlank() ? "Budget Flow <no-reply@localhost>" : from;

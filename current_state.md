@@ -154,7 +154,7 @@ _Last updated: 2026-11-10 (deployed + Grafana)_
 
 ## Open Decisions
 - Grafana: built (2026-11-10). Open: alert contact point (email or Telegram).
-- Email provider: Hostinger SMTP (jiten@jitenjtb.com) for identity; notification-service later
+- Email provider: Hostinger SMTP (app@jitenjtb.com) for identity; notification-service later
 
 ## Notes
 - Production secrets needed (Dokploy env, when deploying): `IDENTITY_SIGNING_KEY_PEM` (RSA 2048+ PKCS#8), `IDENTITY_WEB_CLIENT_SECRET`, DB/RabbitMQ/Redis passwords. Issuer = `https://budgetflow-auth.jitenjtb.com`.

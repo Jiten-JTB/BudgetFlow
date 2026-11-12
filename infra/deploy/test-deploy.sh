@@ -83,8 +83,8 @@ echo "email"
 idv() { q ".services[\"identity-service\"].environment.$1 // empty"; }
 check "identity sends mail through Hostinger over SSL" \
   '[ "$(idv SPRING_MAIL_HOST)" = smtp.hostinger.com ] && [ "$(idv SPRING_MAIL_PORT)" = 465 ] && [ "$(idv SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE)" = true ]'
-check "identity signs in to the mailbox as jiten@jitenjtb.com" '[ "$(idv SPRING_MAIL_USERNAME)" = jiten@jitenjtb.com ] && [ "$(idv SPRING_MAIL_PASSWORD)" = test-mailbox-password ]'
-check "emails come from the same address" '[[ "$(idv IDENTITY_MAIL_FROM)" == *"<jiten@jitenjtb.com>" ]]'
+check "identity signs in to the mailbox as app@jitenjtb.com" '[ "$(idv SPRING_MAIL_USERNAME)" = app@jitenjtb.com ] && [ "$(idv SPRING_MAIL_PASSWORD)" = test-mailbox-password ]'
+check "emails come from the same address" '[[ "$(idv IDENTITY_MAIL_FROM)" == *"<app@jitenjtb.com>" ]]'
 check "verification links open the web app" '[ "$(idv IDENTITY_WEB_VERIFY_EMAIL_URL)" = https://budgetflow.jitenjtb.com/verify-email ]'
 check "email verification is required" '[ "$(idv IDENTITY_EMAIL_VERIFICATION_REQUIRED)" = true ]'
 check "compose refuses to start without the mailbox password" \

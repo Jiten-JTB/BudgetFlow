@@ -106,7 +106,7 @@ Before restoring, stop the service that owns that database, then start it again 
 
 ## 8b. Email (verification links)
 
-- **Sender:** identity sends from `jiten@jitenjtb.com` through `smtp.hostinger.com:465` (SSL). The only secret is `SMTP_PASSWORD` in Dokploy's Environment. Without it, the deploy refuses to start.
+- **Sender:** identity sends from `app@jitenjtb.com` through `smtp.hostinger.com:465` (SSL). The only secret is `SMTP_PASSWORD` in Dokploy's Environment. Without it, the deploy refuses to start.
 - **Delivery:** emails are queued in identity's `email_outbox` and retried with backoff. Each one is deleted once sent, because its link is a secret. A permanent failure logs `EMAIL UNDELIVERABLE`.
 - **DNS:** SPF, DKIM and DMARC for `jitenjtb.com` must be the Hostinger email records, or the mail lands in spam.
 - **Local:** Mailpit catches all email; its UI is at `http://localhost:${MAILPIT_UI_PORT:-8025}`.
