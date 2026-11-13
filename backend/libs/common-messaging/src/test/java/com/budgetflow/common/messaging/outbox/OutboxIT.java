@@ -111,6 +111,28 @@ class OutboxIT {
         assertThat(row.get("published_at")).isNull();
     }
 
+    @Test
+    void rejectionThatClosesTheChannelBeforeTheConfirmWaitIsNotRecordedAsPublished() {
+        // The broker rejects a publish to a missing exchange by closing the channel. If that close lands before the
+        // confirm wait (as on a slow CI runner), Spring silently swaps in a fresh channel with nothing to confirm.
+        OutboxRelay slowRelay = new OutboxRelay(jdbc, rabbit, tx, 10, 3) {
+            @Override
+            void beforeConfirm() {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        };
+        tx.executeWithoutResult(s -> writer.append(OutboxMessage.builder()
+                .exchange("does-not-exist").routingKey("x").type("test.X").payload(Map.of()).build()));
+
+        assertThat(slowRelay.publishPending()).isZero();
+
+        assertThat(pendingCount()).isEqualTo(1);
+    }
+
     private long pendingCount() {
         return jdbc.sql("SELECT count(*) FROM outbox_message WHERE published_at IS NULL").query(Long.class).single();
     }

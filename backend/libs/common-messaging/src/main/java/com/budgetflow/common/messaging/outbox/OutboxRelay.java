@@ -1,13 +1,19 @@
 package com.budgetflow.common.messaging.outbox;
 
+import com.rabbitmq.client.Channel;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.AmqpIOException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.connection.ChannelProxy;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -86,11 +92,27 @@ public class OutboxRelay {
         }
         Message message = new Message(row.payload().getBytes(StandardCharsets.UTF_8), props);
         rabbit.invoke(ops -> {
+            // Wait on the channel the message actually went out on. A rejected publish closes it, and Spring's
+            // cached-channel proxy would silently swap in a fresh channel with nothing pending, so a wait through
+            // the proxy would "confirm" a message the broker never accepted.
+            Channel publishedOn = ops.execute(channel ->
+                    channel instanceof ChannelProxy proxy ? proxy.getTargetChannel() : channel);
             ops.send(row.exchange(), row.routingKey(), message);
-            ops.waitForConfirmsOrDie(CONFIRM_TIMEOUT_MS);
+            beforeConfirm();
+            try {
+                publishedOn.waitForConfirmsOrDie(CONFIRM_TIMEOUT_MS);
+            } catch (IOException | TimeoutException e) {
+                throw new AmqpIOException("Publish of outbox message " + row.id() + " was not confirmed", e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new AmqpException("Interrupted while waiting for the confirm of " + row.id(), e);
+            }
             return null;
         });
     }
+
+    /** Test seam: runs between publishing and waiting for the confirm. */
+    void beforeConfirm() {}
 
     private static String truncate(String value) {
         return value.length() <= MAX_ERROR_LENGTH ? value : value.substring(0, MAX_ERROR_LENGTH);

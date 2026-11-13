@@ -172,3 +172,4 @@ _Last updated: 2026-11-10 (deployed + Grafana)_
 ## Pocket money source type (2026-11-12, for v0.1.6)
 - Income source type `POCKET_MONEY` ("Pocket money"): enum, schema.sql CHECK, transaction `V2__pocket_money_source_type.sql`, api-client zod enum, web SOURCE_TYPES.
 - v0.1.5 is live (sender app@jitenjtb.com).
+- Fixed outbox relay message-loss race (found by CI on v0.1.6): with simple confirms, a broker rejection that closed the channel before the confirm wait made Spring's channel proxy swap in a fresh channel, so the wait "confirmed" a rejected message. Relay now waits on the channel it published on. Deterministic test: `OutboxIT.rejectionThatClosesTheChannelBeforeTheConfirmWaitIsNotRecordedAsPublished`.
